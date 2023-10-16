@@ -40,9 +40,13 @@ export async function handleInput() {
       let res = null;
       const [activeItem] = input.activeItems;
 
+      // Show Tests
+      res = await fetchTests(activeItem.label);
+      const tests = res.data.question.exampleTestcaseList;
+      const meta = JSON.parse(res.data.question.metaData);
+
       // Show Answer
       res = await fetchEditor(activeItem.label);
-      console.log(res);
       const snippets: [{ [key: string]: string }] =
         res.data.question.codeSnippets;
       const snippet = snippets.find((el) => {
@@ -50,22 +54,14 @@ export async function handleInput() {
       });
       if (snippet) {
         const document = await vscode.workspace.openTextDocument({
-          content: snippet.code,
+          content: generateCode(snippet.code, tests, meta.params),
           language: "python",
         });
         vscode.window.showTextDocument(document, vscode.ViewColumn.Active);
       }
 
-      // Show Tests
-      res = await fetchTests(activeItem.label);
-      console.log(res);
-      const question = res.data.question;
-      console.log(question.exampleTestcaseList);
-      console.log(JSON.parse(question.metaData.trim()));
-
       // Show Question
       res = await fetchProblem(activeItem.label);
-      console.log(res);
       const panel = vscode.window.createWebviewPanel(
         "leetcode",
         activeItem.description,
@@ -144,7 +140,7 @@ async function fetchProblem(slug: string) {
 }
 
 function generateHTML(content: string) {
-  return `
+  const html = `
   <html>
   <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -152,6 +148,25 @@ function generateHTML(content: string) {
   </head>
   <body>${content}</body>
   </html>`;
+  return html;
+}
+
+function generateCode(
+  snippet: string,
+  tests: string[],
+  params: [{ [key: string]: string }]
+) {
+  let code = snippet;
+  code += "\n\n";
+  code += "# Test Cases\n";
+
+  tests.forEach((test) => {
+    code += "#\n";
+    test.split("\n").forEach((input, index) => {
+      code += `# ${params[index].name}: ${input}\n`;
+    });
+  });
+  return code;
 }
 
 async function fetchEditor(slug: string) {

@@ -12,7 +12,7 @@ class ProblemItem implements vscode.QuickPickItem {
   }
 }
 
-export async function handleInput() {
+export async function handleLoad() {
   const disposables: vscode.Disposable[] = [];
   const input = vscode.window.createQuickPick<ProblemItem>();
   input.placeholder = "Search Keywords";

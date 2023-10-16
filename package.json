@@ -14,12 +14,16 @@
   "contributes": {
     "commands": [
       {
-        "command": "leetcode-python.loadProblem",
+        "command": "leetcode-python.load",
         "title": "LeetCode Python: Load Problem"
       },
       {
         "command": "leetcode-python.login",
         "title": "LeetCode Python: Login to LeetCode"
+      },
+      {
+        "command": "leetcode-python.run",
+        "title": "LeetCode Python: Run Solution"
       }
     ]
   },

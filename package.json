@@ -1,6 +1,6 @@
 {
-  "name": "leetcode-python",
-  "displayName": "leetcode-python",
+  "name": "vsleet",
+  "displayName": "vsleet",
   "description": "Submit LeetCode problems from within VSCode",
   "version": "0.0.1",
   "engines": {
@@ -14,16 +14,24 @@
   "contributes": {
     "commands": [
       {
-        "command": "leetcode-python.load",
-        "title": "LeetCode Python: Load Problem"
+        "command": "vsleet.load",
+        "title": "VSLeet: Load Problem"
       },
       {
-        "command": "leetcode-python.login",
-        "title": "LeetCode Python: Login to LeetCode"
+        "command": "vsleet.login",
+        "title": "VSLeet: Paste Cookie"
       },
       {
-        "command": "leetcode-python.run",
-        "title": "LeetCode Python: Run Solution"
+        "command": "vsleet.run",
+        "title": "VSLeet: Run Solution"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "vsleet.run",
+        "key": "ctrl+enter",
+        "mac": "cmd+enter",
+        "when": "editorTextFocus"
       }
     ]
   },

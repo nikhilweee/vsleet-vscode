@@ -1,6 +1,6 @@
-# leetcode-python README
+# vsleet README
 
-This is the README for your extension "leetcode-python". After writing up a brief description, we recommend including the following sections.
+This is the README for your extension "vsleet". After writing up a brief description, we recommend including the following sections.
 
 ## Features
 

@@ -1,16 +1,39 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import * as vscode from "vscode";
+import { posix } from "path";
+import { LeetCodeGraphAPI } from "./leetcodeGraphAPI";
+
+interface Snippet {
+  langSlug: string;
+  code: string;
+}
+
+interface Question {
+  frontendQuestionId: string;
+  acRate: number;
+  titleSlug: string;
+  paidOnly: boolean;
+  title: string;
+  difficulty: string;
+}
 
 class ProblemItem implements vscode.QuickPickItem {
-  id: number;
+  id: string;
   description: string;
   label: string;
+  detail: string;
 
-  constructor(num: number, slug: string, title: string) {
-    this.id = num;
-    this.label = slug;
-    this.description = `[${num}] ${title}`;
+  constructor(question: Question) {
+    this.id = question.frontendQuestionId.padStart(4, "0");
+    this.label = question.titleSlug;
+    this.description = `[${this.id}] ${question.title}`;
+    const price = question.paidOnly ? "Paid" : "Free";
+    const acceptance = question.acRate.toFixed(3);
+    this.detail = `${price} ${acceptance} ${question.difficulty}`;
   }
 }
+
+const ltGraph = new LeetCodeGraphAPI();
 
 export async function handleLoad() {
   const disposables: vscode.Disposable[] = [];
@@ -18,125 +41,127 @@ export async function handleLoad() {
   input.placeholder = "Search Keywords";
   input.title = "Load Problem from LeetCode";
   disposables.push(
-    input.onDidChangeValue(async (value) => {
-      input.items = [];
-      input.busy = true;
-      const res = await searchProblems(value);
-      const questions = res.data.problemsetQuestionList?.questions;
-      if (questions) {
-        for (const question of questions) {
-          input.items = input.items.concat(
-            new ProblemItem(
-              parseInt(question.frontendQuestionId),
-              question.titleSlug,
-              question.title
-            )
-          );
-        }
-      }
-      input.busy = false;
+    input.onDidChangeValue((value) => {
+      handleChange(input, value);
     }),
     input.onDidAccept(async () => {
-      let res = null;
-      const [activeItem] = input.activeItems;
-
-      // Show Tests
-      res = await fetchTests(activeItem.label);
-      const tests = res.data.question.exampleTestcaseList;
-      const meta = JSON.parse(res.data.question.metaData);
-
-      // Show Answer
-      res = await fetchEditor(activeItem.label);
-      const snippets: [{ [key: string]: string }] =
-        res.data.question.codeSnippets;
-      const snippet = snippets.find((el) => {
-        return el.langSlug == "python3";
-      });
-      if (snippet) {
-        const document = await vscode.workspace.openTextDocument({
-          content: generateCode(snippet.code, tests, meta.params),
-          language: "python",
-        });
-        vscode.window.showTextDocument(document, vscode.ViewColumn.Active);
-      }
-
-      // Show Question
-      res = await fetchProblem(activeItem.label);
-      const panel = vscode.window.createWebviewPanel(
-        "leetcode",
-        activeItem.description,
-        vscode.ViewColumn.Beside,
-        {}
-      );
-      panel.webview.html = generateHTML(res.data.question.content);
+      handleAccept(input);
     })
   );
   input.show();
 }
 
-async function searchProblems(keywords: string) {
-  const query = `
-  query problemsetQuestionList($categorySlug: String, $limit: Int, $skip: Int, $filters: QuestionListFilterInput) {
-    problemsetQuestionList: questionList(
-      categorySlug: $categorySlug
-      limit: $limit
-      skip: $skip
-      filters: $filters
-    ) {
-      total: totalNum
-      questions: data {
-        acRate
-        difficulty
-        frontendQuestionId: questionFrontendId
-        paidOnly: isPaidOnly
-        status
-        title
-        titleSlug
+async function handleChange(
+  input: vscode.QuickPick<ProblemItem>,
+  value: string
+) {
+  {
+    input.items = [];
+    input.busy = true;
+    const res = await ltGraph.searchProblems(value);
+    const questions = res.data.problemsetQuestionList?.questions;
+    if (questions) {
+      for (const question of questions) {
+        input.items = input.items.concat(new ProblemItem(question));
       }
     }
-  }`;
-
-  const res = await fetch("https://leetcode.com/graphql/", {
-    headers: {
-      "content-type": "application/json",
-    },
-    body: JSON.stringify({
-      query: query,
-      variables: {
-        categorySlug: "",
-        skip: 0,
-        limit: 5,
-        filters: { searchKeywords: keywords },
-      },
-    }),
-    method: "POST",
-  });
-  return res.json();
+    input.busy = false;
+  }
 }
 
-async function fetchProblem(slug: string) {
-  const query = `
-  query questionContent($titleSlug: String!) {
-    question(titleSlug: $titleSlug) {
-      content
-      mysqlSchemas
-      dataSchemas
-    }
-  }`;
+async function handleAccept(input: vscode.QuickPick<ProblemItem>) {
+  let res = null;
+  const [activeItem] = input.activeItems;
 
-  const res = await fetch("https://leetcode.com/graphql/", {
-    headers: {
-      "content-type": "application/json",
-    },
-    body: JSON.stringify({
-      query: query,
-      variables: {
-        titleSlug: slug,
-      },
-    }),
-    method: "POST",
+  // Fetch test cases
+  res = await ltGraph.fetchTests(activeItem.label);
+  const tests = res.data.question.exampleTestcaseList;
+  const meta = JSON.parse(res.data.question.metaData);
+
+  // Fetch editor contents
+  res = await ltGraph.fetchEditor(activeItem.label);
+  let snippets: Snippet[] = res.data.question.codeSnippets;
+  if (!snippets) {
+    const message = "Code snippets not found.";
+    vscode.window.showErrorMessage(message);
+    snippets = [{ langSlug: "python3", code: "" }];
+  }
+
+  let snippet = snippets.find((el) => {
+    return el.langSlug === "python3";
   });
-  return res.json();
+  if (!snippet) {
+    const message = "Python code snippet not found.";
+    vscode.window.showErrorMessage(message);
+    snippet = { langSlug: "python3", code: "" };
+  }
+
+  const fileName = `${activeItem.id}-${activeItem.label}.py`;
+  const fileContents = generateCode(fileName, snippet.code, tests, meta.params);
+
+  // Open existing or create new file
+  // const document = await getTextDocument(fileName, fileContents);
+
+  const document = await vscode.workspace.openTextDocument({
+    content: fileContents,
+    language: "python",
+  });
+  vscode.window.showTextDocument(document, vscode.ViewColumn.Active);
+
+  // Fetch problem description
+  res = await ltGraph.fetchProblem(activeItem.label);
+  const panel = vscode.window.createWebviewPanel(
+    "leetcode",
+    activeItem.description,
+    vscode.ViewColumn.Beside,
+    {}
+  );
+  panel.webview.html = generateHTML(res.data.question.content);
+}
+
+async function getTextDocument(fileName: string, fileContents: string) {
+  let document: vscode.TextDocument;
+
+  if (!vscode.workspace.workspaceFolders) {
+    // No workspace found. Don't create new file on disk.
+    return await vscode.workspace.openTextDocument({
+      content: fileContents,
+      language: "python",
+    });
+  }
+
+  const folderUri = vscode.workspace.workspaceFolders[0].uri;
+  const fileUri = folderUri.with({
+    path: posix.join(folderUri.path, fileName),
+  });
+
+  // Check if file exists on disk
+  let fileExists = true;
+  try {
+    const stat = await vscode.workspace.fs.stat(fileUri);
+  } catch (error) {
+    fileExists = false;
+  }
+
+  if (fileExists) {
+    // Open existing file from disk
+    document = await vscode.workspace.openTextDocument(fileUri);
+  } else {
+    // Try to create a new file on disk
+    const data = Buffer.from(fileContents, "utf-8");
+    try {
+      await vscode.workspace.fs.writeFile(fileUri, data);
+      document = await vscode.workspace.openTextDocument(fileUri);
+    } catch (error) {
+      // Open untitled file
+      document = await vscode.workspace.openTextDocument({
+        content: fileContents,
+        language: "python",
+      });
+    }
+  }
+
+  return document;
 }
 
 function generateHTML(content: string) {
@@ -152,81 +177,22 @@ function generateHTML(content: string) {
 }
 
 function generateCode(
+  fileName: string,
   snippet: string,
   tests: string[],
   params: [{ [key: string]: string }]
 ) {
-  let code = snippet;
-  code += "\n\n";
+  let code = `# ${fileName}\n\n`;
+  code += "# vsleet: start\n\n";
+  code += `${snippet}\n\n`;
+  code += "# vsleet: end\n\n";
   code += "# Test Cases\n";
 
   tests.forEach((test) => {
-    code += "#\n";
+    code += "\n";
     test.split("\n").forEach((input, index) => {
       code += `# ${params[index].name}: ${input}\n`;
     });
   });
   return code;
-}
-
-async function fetchEditor(slug: string) {
-  const query = `
-  query questionEditorData($titleSlug: String!) {
-    question(titleSlug: $titleSlug) {
-      questionId
-      questionFrontendId
-      codeSnippets {
-        lang
-        langSlug
-        code
-      }
-      envInfo
-      enableRunCode
-      hasFrontendPreview
-      frontendPreviews
-    }
-  }`;
-  const res = await fetch("https://leetcode.com/graphql/", {
-    headers: {
-      "content-type": "application/json",
-    },
-    body: JSON.stringify({
-      query: query,
-      variables: {
-        titleSlug: slug,
-      },
-    }),
-    method: "POST",
-  });
-  return res.json();
-}
-
-async function fetchTests(slug: string) {
-  const query = `
-  query consolePanelConfig($titleSlug: String!) {
-    question(titleSlug: $titleSlug) {
-      questionId
-      questionFrontendId
-      questionTitle
-      enableDebugger
-      enableRunCode
-      enableSubmit
-      enableTestMode
-      exampleTestcaseList
-      metaData
-    }
-  }`;
-  const res = await fetch("https://leetcode.com/graphql/", {
-    headers: {
-      "content-type": "application/json",
-    },
-    body: JSON.stringify({
-      query: query,
-      variables: {
-        titleSlug: slug,
-      },
-    }),
-    method: "POST",
-  });
-  return res.json();
 }

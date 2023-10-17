@@ -1,4 +1,17 @@
+/* eslint-disable @typescript-eslint/naming-convention */
+import * as vscode from "vscode";
+
 export class LeetCodeGraphAPI {
+  cookie = "";
+
+  constructor(context: vscode.ExtensionContext) {
+    context.secrets.get("cookie").then((cookie) => {
+      if (cookie) {
+        this.cookie = cookie;
+      }
+    });
+  }
+
   async searchProblems(keywords: string) {
     const query = `
       query problemsetQuestionList(
@@ -29,7 +42,7 @@ export class LeetCodeGraphAPI {
     const variables = {
       categorySlug: "",
       skip: 0,
-      limit: 5,
+      limit: 20,
       filters: { searchKeywords: keywords },
     };
 
@@ -97,12 +110,32 @@ export class LeetCodeGraphAPI {
     return this.graphAPICall(query, variables);
   }
 
+  async prepareHeaders() {
+    let headers: { [key: string]: string };
+    let csrftoken = "";
+
+    headers = {
+      "content-type": "application/json",
+    };
+
+    if (this.cookie) {
+      let token = this.cookie.split(";").find((element) => {
+        return element.split("=").shift() === "csrftoken";
+      });
+      csrftoken = token?.split("=").pop() || "";
+    }
+
+    if (csrftoken) {
+      headers["x-csrftoken"] = csrftoken;
+      headers["cookie"] = this.cookie;
+    }
+
+    return headers;
+  }
+
   async graphAPICall(query: string, variables: object): Promise<any> {
     const res = await fetch("https://leetcode.com/graphql/", {
-      headers: {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        "content-type": "application/json",
-      },
+      headers: await this.prepareHeaders(),
       body: JSON.stringify({
         query: query,
         variables: variables,

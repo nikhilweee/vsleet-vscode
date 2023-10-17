@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import * as vscode from "vscode";
 import { posix } from "path";
-import { LeetCodeGraphAPI } from "./leetcodeGraphAPI";
+import { LeetCodeGraphAPI } from "./leetCodeGraphAPI";
 
 interface Snippet {
   langSlug: string;
@@ -15,6 +15,7 @@ interface Question {
   paidOnly: boolean;
   title: string;
   difficulty: string;
+  status: string;
 }
 
 class ProblemItem implements vscode.QuickPickItem {
@@ -22,20 +23,37 @@ class ProblemItem implements vscode.QuickPickItem {
   description: string;
   label: string;
   detail: string;
+  slug: string;
+  title: string;
 
   constructor(question: Question) {
     this.id = question.frontendQuestionId.padStart(4, "0");
-    this.label = question.titleSlug;
-    this.description = `[${this.id}] ${question.title}`;
+    this.slug = question.titleSlug;
+    this.description = this.slug;
+    this.title = `[${this.id}] ${question.title}`;
+    this.label = this.title;
+
     const price = question.paidOnly ? "Paid" : "Free";
     const acceptance = question.acRate.toFixed(3);
-    this.detail = `${price} ${acceptance} ${question.difficulty}`;
+    this.detail = `Price: ${price} | Difficulty: ${question.difficulty} | AC: ${acceptance}%`;
+    this.detail += ``;
+    switch (question.status) {
+      case "ac":
+        this.detail += ` | Status: Accepted`;
+        break;
+      case "notac":
+        this.detail += ` | Status: Attempted`;
+        break;
+      case null:
+        break;
+    }
   }
 }
 
-const ltGraph = new LeetCodeGraphAPI();
+let ltGraph: LeetCodeGraphAPI;
 
-export async function handleLoad() {
+export async function handleLoad(context: vscode.ExtensionContext) {
+  ltGraph = new LeetCodeGraphAPI(context);
   const disposables: vscode.Disposable[] = [];
   const input = vscode.window.createQuickPick<ProblemItem>();
   input.placeholder = "Search Keywords";
@@ -60,10 +78,12 @@ async function handleChange(
     input.busy = true;
     const res = await ltGraph.searchProblems(value);
     const questions = res.data.problemsetQuestionList?.questions;
+    let questionsArray = [];
     if (questions) {
       for (const question of questions) {
-        input.items = input.items.concat(new ProblemItem(question));
+        questionsArray.push(new ProblemItem(question));
       }
+      input.items = questionsArray;
     }
     input.busy = false;
   }
@@ -74,12 +94,12 @@ async function handleAccept(input: vscode.QuickPick<ProblemItem>) {
   const [activeItem] = input.activeItems;
 
   // Fetch test cases
-  res = await ltGraph.fetchTests(activeItem.label);
+  res = await ltGraph.fetchTests(activeItem.slug);
   const tests = res.data.question.exampleTestcaseList;
   const meta = JSON.parse(res.data.question.metaData);
 
   // Fetch editor contents
-  res = await ltGraph.fetchEditor(activeItem.label);
+  res = await ltGraph.fetchEditor(activeItem.slug);
   let snippets: Snippet[] = res.data.question.codeSnippets;
   if (!snippets) {
     const message = "Code snippets not found.";
@@ -96,7 +116,7 @@ async function handleAccept(input: vscode.QuickPick<ProblemItem>) {
     snippet = { langSlug: "python3", code: "" };
   }
 
-  const fileName = `${activeItem.id}-${activeItem.label}.py`;
+  const fileName = `${activeItem.id}-${activeItem.slug}.py`;
   const fileContents = generateCode(fileName, snippet.code, tests, meta.params);
 
   // Open existing or create new file
@@ -109,10 +129,10 @@ async function handleAccept(input: vscode.QuickPick<ProblemItem>) {
   vscode.window.showTextDocument(document, vscode.ViewColumn.Active);
 
   // Fetch problem description
-  res = await ltGraph.fetchProblem(activeItem.label);
+  res = await ltGraph.fetchProblem(activeItem.slug);
   const panel = vscode.window.createWebviewPanel(
     "leetcode",
-    activeItem.description,
+    activeItem.title,
     vscode.ViewColumn.Beside,
     {}
   );

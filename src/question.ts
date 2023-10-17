@@ -29,13 +29,13 @@ class ProblemItem implements vscode.QuickPickItem {
   constructor(question: Question) {
     this.id = question.frontendQuestionId.padStart(4, "0");
     this.slug = question.titleSlug;
-    this.description = this.slug;
+    this.description = "";
     this.title = `[${this.id}] ${question.title}`;
     this.label = this.title;
 
-    const price = question.paidOnly ? "Paid" : "Free";
+    const price = question.paidOnly ? "Premium" : "Free";
     const acceptance = question.acRate.toFixed(3);
-    this.detail = `Price: ${price} | Difficulty: ${question.difficulty} | AC: ${acceptance}%`;
+    this.detail = `Tier: ${price} | Difficulty: ${question.difficulty} | AC: ${acceptance}%`;
     this.detail += ``;
     switch (question.status) {
       case "ac":
@@ -206,10 +206,9 @@ function generateCode(
   code += "# vsleet: start\n\n";
   code += `${snippet}\n\n`;
   code += "# vsleet: end\n\n";
-  code += "# Test Cases\n";
+  code += "# Default Test Cases\n";
 
   tests.forEach((test) => {
-    code += "\n";
     test.split("\n").forEach((input, index) => {
       code += `# ${params[index].name}: ${input}\n`;
     });

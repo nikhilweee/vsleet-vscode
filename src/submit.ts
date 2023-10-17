@@ -10,21 +10,43 @@ interface Object {
 
 export async function handleRun(context: vscode.ExtensionContext) {
   if (!vscode.window.activeTextEditor) {
+    vscode.window.showErrorMessage(
+      `Cannot find active editor.
+      Please run this command from 
+      an active editor window.`
+    );
     return;
   }
 
   ltJudge = new LeetCodeJudgeAPI(context);
 
   const name = vscode.window.activeTextEditor.document.fileName;
-  const stem = name.split("/").pop();
-  if (!stem) {
-    vscode.window.showErrorMessage("Cannot parse problem ID");
+  const stem = name.split("/").pop() || "";
+  const reName = RegExp("(d*)-([-w]*).py");
+  const resultsName = reName.exec(stem);
+  if (!resultsName || resultsName.length < 3) {
+    vscode.window.showErrorMessage(
+      `Cannot parse problem information.
+      Expected filename format is {id}-{slug}.py
+      (as in 0001-two-sum.py).`
+    );
     return;
   }
-  const slug = stem.slice(5, -3);
-  const id = parseInt(stem.slice(0, 4));
 
-  const code = vscode.window.activeTextEditor.document.getText();
+  const slug = resultsName[1];
+  const id = parseInt(resultsName[2]);
+
+  let code = vscode.window.activeTextEditor.document.getText();
+  const reCode = RegExp("# vsleet: start(.*)# vsleet: end", "gms");
+  const resultsCode = reCode.exec(code);
+  if (!resultsCode || resultsCode.length < 2) {
+    vscode.window.showErrorMessage(
+      `Cannot find code markers.
+      Please decorate your solution between 
+      # vsleet: start and # vsleet: end tags.`
+    );
+    return;
+  }
 
   let res = await ltJudge.submitRun(id, slug, code);
   const interpredId = res.interpret_id;

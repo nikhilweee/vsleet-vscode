@@ -1,34 +1,32 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import * as vscode from "vscode";
+import { LeetCodeJudgeAPI } from "./leetcodeJudgeAPI";
+
+let ltJudge: LeetCodeJudgeAPI;
+
+interface Object {
+  [key: string]: string;
+}
 
 export async function handleRun(context: vscode.ExtensionContext) {
   if (!vscode.window.activeTextEditor) {
     return;
   }
 
+  ltJudge = new LeetCodeJudgeAPI(context);
+
   const name = vscode.window.activeTextEditor.document.fileName;
   const stem = name.split("/").pop();
   if (!stem) {
+    vscode.window.showErrorMessage("Cannot parse problem ID");
     return;
   }
   const slug = stem.slice(5, -3);
   const id = parseInt(stem.slice(0, 4));
 
   const code = vscode.window.activeTextEditor.document.getText();
-  const cookies = await context.secrets.get("cookie");
-  if (!cookies) {
-    const message = "Session cookie not found";
-    const selected = await vscode.window.showErrorMessage(
-      message,
-      "Paste Cookie"
-    );
-    if (selected) {
-      vscode.commands.executeCommand("vsleet.login");
-    }
-    return;
-  }
 
-  let res = await submitRun(id, slug, cookies, code);
+  let res = await ltJudge.submitRun(id, slug, code);
   const interpredId = res.interpret_id;
   await vscode.window.withProgress(
     {
@@ -39,17 +37,16 @@ export async function handleRun(context: vscode.ExtensionContext) {
     async (progress, token) => {
       for (let retries = 1; retries <= 24; retries++) {
         await new Promise((resolve) => setTimeout(resolve, 5000));
-        res = await checkRun(interpredId, slug, cookies);
+        res = await ltJudge.checkRun(interpredId, slug);
         if (res.state === "SUCCESS") {
-          const document = await vscode.workspace.openTextDocument({
-            content: JSON.stringify(res, null, 2),
-            language: "json",
-          });
-          return vscode.window.showTextDocument(document, {
-            preview: true,
-            preserveFocus: true,
-            viewColumn: vscode.ViewColumn.Beside,
-          });
+          const panel = vscode.window.createWebviewPanel(
+            "leetcode",
+            "Run Results",
+            vscode.ViewColumn.Beside,
+            {}
+          );
+          panel.webview.html = parseRunResults(res);
+          return;
         }
       }
       vscode.window.showErrorMessage("Timed out waiting for Judge");
@@ -57,98 +54,65 @@ export async function handleRun(context: vscode.ExtensionContext) {
   );
 }
 
-async function checkRun(interpretId: string, slug: string, cookies: string) {
-  const headers = await prepareHeaders(slug, cookies);
-  const res = await fetch(
-    `https://leetcode.com/submissions/detail/${interpretId}/check/`,
-    {
-      headers: headers,
-      body: null,
-      method: "POST",
-      credentials: "same-origin",
-    }
-  );
+function parseRunResults(results: Object): string {
+  let parsed = `
+  <html>
+  <head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>pre { white-space: pre-wrap; }</style>
+  </head>
+  <body>
+  <h3>${results.submission_id}</h3>
 
-  return res.json();
-}
+  <h3>Run Overview</h3>
+  <ul>
+  <li><strong>State</strong>: ${results.state}</li>
+  <li><strong>Run Success</strong>: ${results.run_success}</li>
+  <li><strong>Elapsed Time</strong>: ${results.elapsed_time}</li>
+  <li><strong>Total Correct</strong>: ${results.total_correct}</li>
+  <li><strong>Total Testcases</strong>: ${results.total_testcases}</li>
+  </ul>
 
-async function submitRun(
-  id: number,
-  slug: string,
-  cookies: string,
-  code: string
-) {
-  const headers = await prepareHeaders(slug, cookies);
+  <h3>Run Status</h3>
+  <ul>
+  <li><strong>Runtime Status</strong>: ${results.status_runtime}</li>
+  <li><strong>Runtime Percentile</strong>: ${results.runtime_percentile}</li>
+  <li><strong>Memory Status</strong>: ${results.status_memory}</li>
+  <li><strong>Memory Percentile</strong>: ${results.memory_percentile}</li>
+  </ul>
 
-  let tests = await fetchTests(slug);
-  tests = tests.data.question.exampleTestcaseList.join("\n");
+  <h3>Error</h3>
+  <pre>${results.runtime_error}</pre>
 
-  const body = JSON.stringify({
-    data_input: tests,
-    lang: "python3",
-    question_id: id,
-    typed_code: code,
+  <h3>Full Error</h3>
+  <pre>${results.full_runtime_error}</pre>
+  `;
+
+  [
+    "submission_id",
+    "state",
+    "run_success",
+    "elapsed_time",
+    "total_correct",
+    "total_testcases",
+    "status_runtime",
+    "runtime_percentile",
+    "status_memory",
+    "memory_percentile",
+    "runtime_error",
+    "full_runtime_error",
+  ].forEach((key) => {
+    delete results[key];
   });
 
-  const res = await fetch(
-    `https://leetcode.com/problems/${slug}/interpret_solution/`,
-    {
-      headers: headers,
-      body: body,
-      method: "POST",
-      credentials: "same-origin",
-    }
-  );
-  return res.json();
-}
+  let otherResults = JSON.stringify(results, null, 2);
 
-async function prepareHeaders(slug: string, cookies: string) {
-  let csrftoken = cookies.split(";").find((element) => {
-    return element.split("=").shift() === "csrftoken";
-  });
-  csrftoken = csrftoken?.split("=").pop();
+  parsed += `
+  <h3>Other Information</h3>
+  <pre>${otherResults}</pre>
+  </body>
+  </html>
+  `;
 
-  if (!csrftoken) {
-    const message = "CSRFToken cookie not found. Please login again.";
-    await vscode.window.showErrorMessage(message);
-    return;
-  }
-
-  const headers = {
-    "x-csrftoken": csrftoken,
-    referer: `https://leetcode.com/problems/${slug}/`,
-    cookie: cookies,
-    "content-type": "application/json",
-  };
-  return headers;
-}
-
-async function fetchTests(slug: string) {
-  const query = `
-    query consolePanelConfig($titleSlug: String!) {
-      question(titleSlug: $titleSlug) {
-        questionId
-        questionFrontendId
-        questionTitle
-        enableDebugger
-        enableRunCode
-        enableSubmit
-        enableTestMode
-        exampleTestcaseList
-        metaData
-      }
-    }`;
-  const res = await fetch("https://leetcode.com/graphql/", {
-    headers: {
-      "content-type": "application/json",
-    },
-    body: JSON.stringify({
-      query: query,
-      variables: {
-        titleSlug: slug,
-      },
-    }),
-    method: "POST",
-  });
-  return res.json();
+  return parsed;
 }

@@ -1,6 +1,10 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import * as vscode from "vscode";
 
+interface Object {
+  [key: string]: string;
+}
+
 export class LeetCodeGraphAPI {
   cookie = "";
 
@@ -111,7 +115,7 @@ export class LeetCodeGraphAPI {
   }
 
   async prepareHeaders() {
-    let headers: { [key: string]: string };
+    let headers: Object;
     let csrftoken = "";
 
     headers = {

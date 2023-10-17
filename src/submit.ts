@@ -17,8 +17,14 @@ export async function handleRun(context: vscode.ExtensionContext) {
   const code = vscode.window.activeTextEditor.document.getText();
   const cookies = await context.secrets.get("cookie");
   if (!cookies) {
-    const message = "Session cookie not found. Please Login";
-    await vscode.window.showErrorMessage(message);
+    const message = "Session cookie not found";
+    const selected = await vscode.window.showErrorMessage(
+      message,
+      "Paste Cookie"
+    );
+    if (selected) {
+      vscode.commands.executeCommand("vsleet.login");
+    }
     return;
   }
 
@@ -31,7 +37,7 @@ export async function handleRun(context: vscode.ExtensionContext) {
       cancellable: true,
     },
     async (progress, token) => {
-      while (true) {
+      for (let retries = 1; retries <= 24; retries++) {
         await new Promise((resolve) => setTimeout(resolve, 5000));
         res = await checkRun(interpredId, slug, cookies);
         if (res.state === "SUCCESS") {
@@ -46,6 +52,7 @@ export async function handleRun(context: vscode.ExtensionContext) {
           });
         }
       }
+      vscode.window.showErrorMessage("Timed out waiting for Judge");
     }
   );
 }

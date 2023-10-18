@@ -2,30 +2,7 @@
 import * as vscode from "vscode";
 import { posix } from "path";
 import { LeetCodeGraphAPI } from "./leetcodeGraphAPI";
-
-interface Snippet {
-  langSlug: string;
-  code: string;
-}
-
-interface Question {
-  frontendQuestionId: string;
-  acRate: number;
-  titleSlug: string;
-  paidOnly: boolean;
-  title: string;
-  difficulty: string;
-  status: string;
-}
-
-interface Meta {
-  params: Object[];
-  name: string;
-}
-
-interface Object {
-  [key: string]: string;
-}
+import { Object, Question, Snippet, Meta } from "./interfaces";
 
 class ProblemItem implements vscode.QuickPickItem {
   id: string;

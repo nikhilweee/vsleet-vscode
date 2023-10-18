@@ -1,0 +1,23 @@
+export interface Object {
+  [key: string]: string;
+}
+
+export interface Snippet {
+  langSlug: string;
+  code: string;
+}
+
+export interface Question {
+  frontendQuestionId: string;
+  acRate: number;
+  titleSlug: string;
+  paidOnly: boolean;
+  title: string;
+  difficulty: string;
+  status: string;
+}
+
+export interface Meta {
+  params: Object[];
+  name: string;
+}

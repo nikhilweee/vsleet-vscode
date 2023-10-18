@@ -1,12 +1,9 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import * as vscode from "vscode";
 import { LeetCodeJudgeAPI } from "./leetcodeJudgeAPI";
+import { Object } from "./interfaces";
 
 let ltJudge: LeetCodeJudgeAPI;
-
-interface Object {
-  [key: string]: string;
-}
 
 export async function handleRun(context: vscode.ExtensionContext) {
   ltJudge = new LeetCodeJudgeAPI(context);

@@ -1,9 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import * as vscode from "vscode";
+import { Object } from "./interfaces";
 
-interface Object {
-  [key: string]: string;
-}
 
 export class LeetCodeGraphAPI {
   cookie = "";

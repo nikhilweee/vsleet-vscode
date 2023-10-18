@@ -6,7 +6,7 @@
     "type": "git",
     "url": "https://github.com/nikhilweee/vsleet.git"
   },
-  "icon": "media/leetcode-dark.png",
+  "icon": "media/vsleet.png",
   "description": "Submit LeetCode problems from within VSCode",
   "version": "0.0.3",
   "engines": {

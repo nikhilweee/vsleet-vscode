@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as fetch from "./fetch";
-import * as login from "./login";
+import * as cookie from "./cookie";
 import * as execute from "./execute";
 
 export function activate(context: vscode.ExtensionContext) {
@@ -13,7 +13,7 @@ export function activate(context: vscode.ExtensionContext) {
   );
   context.subscriptions.push(
     vscode.commands.registerCommand("vsleet.login", () => {
-      login.handleLogin(context);
+      cookie.handleLogin(context);
     })
   );
   context.subscriptions.push(

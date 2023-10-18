@@ -15,15 +15,15 @@
     "commands": [
       {
         "command": "vsleet.load",
-        "title": "VSLeet: Load Problem"
+        "title": "VS Leet: Load Problem"
       },
       {
         "command": "vsleet.login",
-        "title": "VSLeet: Paste Cookie"
+        "title": "VS Leet: Paste Cookie"
       },
       {
         "command": "vsleet.local",
-        "title": "VSLeet: Local Solution",
+        "title": "VS Leet: Local Solution",
         "icon": {
           "light": "media/leetcode-light.svg",
           "dark": "media/leetcode-dark.svg"
@@ -31,7 +31,7 @@
       },
       {
         "command": "vsleet.run",
-        "title": "VSLeet: Run Solution",
+        "title": "VS Leet: Run Solution",
         "icon": {
           "light": "media/leetcode-light.svg",
           "dark": "media/leetcode-dark.svg"
@@ -39,7 +39,7 @@
       },
       {
         "command": "vsleet.submit",
-        "title": "VSLeet: Submit Solution",
+        "title": "VS Leet: Submit Solution",
         "icon": {
           "light": "media/leetcode-light.svg",
           "dark": "media/leetcode-dark.svg"

@@ -63,7 +63,7 @@ export class LeetCodeJudgeAPI {
 
     // Show error if cookie not found
     if (!csrftoken) {
-      const message = "Session cookie not found";
+      const message = "Session cookie not found.";
       const selected = await vscode.window.showErrorMessage(
         message,
         "Paste Cookie"

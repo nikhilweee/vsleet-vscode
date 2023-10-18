@@ -6,7 +6,7 @@ import { Object } from "./interfaces";
 let ltJudge: LeetCodeJudgeAPI;
 
 export async function handleLocal() {
-  vscode.commands.executeCommand("python.execInTerminalIcon");
+  vscode.commands.executeCommand("python.execInTerminal");
 }
 
 export async function handleRun(context: vscode.ExtensionContext) {
@@ -51,7 +51,7 @@ async function checkExecution(checkId: string, slug: string, command: string) {
           return;
         }
       }
-      vscode.window.showErrorMessage(`${command}: Timed out waiting for Judge`);
+      vscode.window.showErrorMessage(`${command}: Timed out waiting for Judge.`);
     }
   );
 }

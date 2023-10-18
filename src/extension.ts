@@ -17,6 +17,11 @@ export function activate(context: vscode.ExtensionContext) {
     })
   );
   context.subscriptions.push(
+    vscode.commands.registerCommand("vsleet.local", () => {
+      execute.handleLocal();
+    })
+  );
+  context.subscriptions.push(
     vscode.commands.registerCommand("vsleet.run", () => {
       execute.handleRun(context);
     })

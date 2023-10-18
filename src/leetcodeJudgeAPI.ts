@@ -22,6 +22,10 @@ export class LeetCodeJudgeAPI {
   }
 
   async submitSolution(id: number, slug: string, code: string) {
+    // TODO: Hack to prevent cookies not being set
+    let tests = await this.ltGraph.fetchTests(slug);
+    tests = tests.data.question.exampleTestcaseList.join("\n");
+
     const body = JSON.stringify({
       lang: "python3",
       question_id: id,
@@ -85,15 +89,12 @@ export class LeetCodeJudgeAPI {
     slug: string,
     body: string | null
   ): Promise<any> {
-    const headers = await this.prepareHeaders(slug);
-
     const res = await fetch(url, {
-      headers: headers,
+      headers: await this.prepareHeaders(slug),
       body: body,
       method: "POST",
       credentials: "same-origin",
     });
-
     return res.json();
   }
 }

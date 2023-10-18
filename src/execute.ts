@@ -5,6 +5,10 @@ import { Object } from "./interfaces";
 
 let ltJudge: LeetCodeJudgeAPI;
 
+export async function handleLocal() {
+  vscode.commands.executeCommand("python.execInTerminalIcon");
+}
+
 export async function handleRun(context: vscode.ExtensionContext) {
   ltJudge = new LeetCodeJudgeAPI(context);
 
@@ -29,7 +33,7 @@ async function checkExecution(checkId: string, slug: string, command: string) {
   await vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Notification,
-      title: "Waiting for Judge",
+      title: `${command}: Waiting for Judge`,
       cancellable: true,
     },
     async (progress, token) => {
@@ -47,7 +51,7 @@ async function checkExecution(checkId: string, slug: string, command: string) {
           return;
         }
       }
-      vscode.window.showErrorMessage("Timed out waiting for Judge");
+      vscode.window.showErrorMessage(`${command}: Timed out waiting for Judge`);
     }
   );
 }
@@ -78,9 +82,9 @@ function parseEditor() {
   const slug = resultsName[2];
   const id = parseInt(resultsName[1]);
 
-  let code = vscode.window.activeTextEditor.document.getText();
+  let rawCode = vscode.window.activeTextEditor.document.getText();
   const reCode = RegExp("# vsleet: start(.*)# vsleet: end", "gms");
-  const resultsCode = reCode.exec(code);
+  const resultsCode = reCode.exec(rawCode);
   if (!resultsCode || resultsCode.length < 2) {
     vscode.window.showErrorMessage(
       `Cannot find code markers.
@@ -89,6 +93,8 @@ function parseEditor() {
     );
     throw new Error("Cannot find code markers.");
   }
+
+  const code = resultsCode[1];
 
   return { id: id, slug: slug, code: code };
 }
@@ -128,18 +134,33 @@ function parseExecutionResults(results: Object, command: string): string {
   const status_msg = pop(results, "status_msg");
 
   parsed.heading = `
-  <h2>${status_msg} (${num_correct} / ${num_total})</h2>
+  <h2>${status_msg}: ${num_correct} / ${num_total}</h2>
   `;
 
   // Format Status
 
+  let runtime_percentile = pop(results, "runtime_percentile");
+  if (runtime_percentile) {
+    runtime_percentile = `<li>Runtime Percentile: ${runtime_percentile}</li>`;
+  } else {
+    runtime_percentile = "";
+  }
+
+  let memory_percentile = pop(results, "memory_percentile");
+  if (memory_percentile) {
+    memory_percentile = `<li>Memory Percentile: ${memory_percentile}</li>`;
+  } else {
+    memory_percentile = "";
+  }
+
   parsed.status = `
   <h3>${command} Status</h3>
   <ul>
-  <li><strong>Correct</strong>: ${pop(results, "correct_answer")}</li>
-  <li><strong>Elapsed Time</strong>: ${pop(results, "elapsed_time")}</li>
-  <li><strong>Runtime Status</strong>: ${pop(results, "status_runtime")}</li>
-  <li><strong>Memory Status</strong>: ${pop(results, "status_memory")}</li>
+  <li>Elapsed Time: ${pop(results, "elapsed_time")}</li>
+  <li>Runtime Status: ${pop(results, "status_runtime")}</li>
+  <li>Memory Status: ${pop(results, "status_memory")}</li>
+  ${runtime_percentile}
+  ${memory_percentile}
   </ul>
   `;
 
@@ -174,7 +195,7 @@ function parseExecutionResults(results: Object, command: string): string {
   </html>
   `;
 
-  // Format All
+  // Format HTML
 
   let formatted = `
   <html>

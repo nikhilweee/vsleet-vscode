@@ -2,7 +2,6 @@
 import * as vscode from "vscode";
 import { Object } from "./interfaces";
 
-
 export class LeetCodeGraphAPI {
   cookie = "";
 

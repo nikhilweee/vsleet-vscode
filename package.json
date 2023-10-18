@@ -22,6 +22,14 @@
         "title": "VSLeet: Paste Cookie"
       },
       {
+        "command": "vsleet.local",
+        "title": "VSLeet: Local Solution",
+        "icon": {
+          "light": "media/leetcode-light.svg",
+          "dark": "media/leetcode-dark.svg"
+        }
+      },
+      {
         "command": "vsleet.run",
         "title": "VSLeet: Run Solution",
         "icon": {
@@ -41,20 +49,29 @@
     "menus": {
       "editor/title/run": [
         {
+          "command": "vsleet.local",
+          "group": "2_leetcode",
+          "when": "editorFocus"
+        },
+        {
           "command": "vsleet.run",
-          "title": "VSLeet: Run Solution",
           "group": "2_leetcode",
           "when": "editorFocus"
         },
         {
           "command": "vsleet.submit",
-          "title": "VSLeet: Submit Solution",
           "group": "2_leetcode",
           "when": "editorFocus"
         }
       ]
     },
     "keybindings": [
+      {
+        "command": "vsleet.local",
+        "key": "shift+enter",
+        "mac": "shift+enter",
+        "when": "editorFocus"
+      },
       {
         "command": "vsleet.run",
         "key": "ctrl+enter",

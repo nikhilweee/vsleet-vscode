@@ -15,7 +15,7 @@ export async function handleRun(context: vscode.ExtensionContext) {
 
   let res = await ltJudge.runSolution(id, slug, code);
   const checkId = res.interpret_id;
-  await checkExecution(checkId, slug);
+  await checkExecution(checkId, slug, "Run");
 }
 
 export async function handleSubmit(context: vscode.ExtensionContext) {
@@ -25,10 +25,10 @@ export async function handleSubmit(context: vscode.ExtensionContext) {
 
   let res = await ltJudge.submitSolution(id, slug, code);
   const checkId = res.submission_id;
-  await checkExecution(checkId, slug);
+  await checkExecution(checkId, slug, "Submission");
 }
 
-async function checkExecution(checkId: string, slug: string) {
+async function checkExecution(checkId: string, slug: string, command: string) {
   await vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Notification,
@@ -42,11 +42,11 @@ async function checkExecution(checkId: string, slug: string) {
         if (res.state === "SUCCESS") {
           const panel = vscode.window.createWebviewPanel(
             "leetcode",
-            "Run Results",
+            `${command} Results`,
             vscode.ViewColumn.Beside,
             {}
           );
-          panel.webview.html = parseExecutionResults(res);
+          panel.webview.html = parseExecutionResults(res, command);
           return;
         }
       }
@@ -96,7 +96,7 @@ function parseEditor() {
   return { id: id, slug: slug, code: code };
 }
 
-function parseExecutionResults(results: Object): string {
+function parseExecutionResults(results: Object, command: string): string {
   const parsed: Object = {};
 
   // Format Test Cases
@@ -137,7 +137,7 @@ function parseExecutionResults(results: Object): string {
   // Format Status
 
   parsed.status = `
-  <h3>Run Status</h3>
+  <h3>${command} Status</h3>
   <ul>
   <li><strong>Correct</strong>: ${pop(results, "correct_answer")}</li>
   <li><strong>Elapsed Time</strong>: ${pop(results, "elapsed_time")}</li>

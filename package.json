@@ -62,7 +62,7 @@
         "when": "editorFocus"
       },
       {
-        "command": "vsleet.run",
+        "command": "vsleet.submit",
         "key": "ctrl+shift+enter",
         "mac": "cmd+shift+enter",
         "when": "editorFocus"

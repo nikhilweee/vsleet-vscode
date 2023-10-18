@@ -1,14 +1,14 @@
 import * as vscode from "vscode";
-import * as question from "./question";
+import * as fetch from "./fetch";
 import * as login from "./login";
-import * as submit from "./submit";
+import * as execute from "./execute";
 
 export function activate(context: vscode.ExtensionContext) {
   // context.secrets.store("cookie", "");
 
   context.subscriptions.push(
     vscode.commands.registerCommand("vsleet.load", () => {
-      question.handleLoad(context);
+      fetch.handleLoad(context);
     })
   );
   context.subscriptions.push(
@@ -18,12 +18,12 @@ export function activate(context: vscode.ExtensionContext) {
   );
   context.subscriptions.push(
     vscode.commands.registerCommand("vsleet.run", () => {
-      submit.handleRun(context);
+      execute.handleRun(context);
     })
   );
   context.subscriptions.push(
     vscode.commands.registerCommand("vsleet.submit", () => {
-      submit.handleSubmit(context);
+      execute.handleSubmit(context);
     })
   );
 }

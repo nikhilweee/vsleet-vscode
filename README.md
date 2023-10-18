@@ -2,8 +2,8 @@
 
 VS Code extension for solving LeetCode problems directly from the editor.
 
-- **:warning:** This extension is under active development.
-- **:warning:** This extension only supports `python3` for now.
+- **⚠️** This extension is under active development.
+- **⚠️** This extension only supports `python3` for now.
 
 ## Walkthrough
 

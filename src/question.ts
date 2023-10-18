@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import * as vscode from "vscode";
 import { posix } from "path";
-import { LeetCodeGraphAPI } from "./leetCodeGraphAPI";
+import { LeetCodeGraphAPI } from "./leetcodeGraphAPI";
 
 interface Snippet {
   langSlug: string;
@@ -16,6 +16,15 @@ interface Question {
   title: string;
   difficulty: string;
   status: string;
+}
+
+interface Meta {
+  params: Object[];
+  name: string;
+}
+
+interface Object {
+  [key: string]: string;
 }
 
 class ProblemItem implements vscode.QuickPickItem {
@@ -40,9 +49,11 @@ class ProblemItem implements vscode.QuickPickItem {
     switch (question.status) {
       case "ac":
         this.detail += ` | Status: Accepted`;
+        this.label += ` $(check-all)`;
         break;
       case "notac":
         this.detail += ` | Status: Attempted`;
+        this.label += ` $(check)`;
         break;
       case null:
         break;
@@ -117,7 +128,7 @@ async function handleAccept(input: vscode.QuickPick<ProblemItem>) {
   }
 
   const fileName = `${activeItem.id}-${activeItem.slug}.py`;
-  const fileContents = generateCode(fileName, snippet.code, tests, meta.params);
+  const fileContents = generateCode(fileName, snippet.code, tests, meta);
 
   // Open existing or create new file
   // const document = await getTextDocument(fileName, fileContents);
@@ -200,18 +211,36 @@ function generateCode(
   fileName: string,
   snippet: string,
   tests: string[],
-  params: [{ [key: string]: string }]
+  meta: Meta
 ) {
+  // Format editor snippet
   let code = `# ${fileName}\n\n`;
   code += "# vsleet: start\n\n";
   code += `${snippet}\n\n`;
   code += "# vsleet: end\n\n";
-  code += "# Default Test Cases\n";
+  code += "# Default Test Cases\n\n";
 
+  // Format test cases
+  let testCases: Object[] = [];
   tests.forEach((test) => {
-    test.split("\n").forEach((input, index) => {
-      code += `# ${params[index].name}: ${input}\n`;
+    let testCase: Object = {};
+    test.split("\n").forEach((input, i) => {
+      let arg = meta.params[i].name;
+      testCase[arg] = JSON.parse(input);
     });
+    testCases.push(testCase);
   });
+  const testString = JSON.stringify(testCases, null, 2);
+
+  // Format main block
+  code += `testcases = ${testString}\n\n`;
+  code += `# Run Code Locally\n\n`;
+  code += `if __name__ == "__main__":\n`;
+  code += `  solution = Solution()\n`;
+  code += `  for testcase in testcases:\n`;
+  code += `    result = solution.${meta.name}(**testcase)\n`;
+  code += `    print(testcase)\n`;
+  code += `    print(result)\n`;
+
   return code;
 }

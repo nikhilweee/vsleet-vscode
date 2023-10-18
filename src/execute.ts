@@ -33,7 +33,7 @@ async function checkExecution(checkId: string, slug: string, command: string) {
   await vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Notification,
-      title: `${command}: Waiting for Judge`,
+      title: `VS Leet ${command}: Waiting for Judge`,
       cancellable: true,
     },
     async (progress, token) => {
@@ -51,7 +51,9 @@ async function checkExecution(checkId: string, slug: string, command: string) {
           return;
         }
       }
-      vscode.window.showErrorMessage(`${command}: Timed out waiting for Judge.`);
+      vscode.window.showErrorMessage(
+        `VS Leet ${command}: Timed out waiting for Judge.`
+      );
     }
   );
 }
@@ -110,7 +112,11 @@ function parseExecutionResults(results: Object, command: string): string {
 
   parsed.tests = "";
 
-  if (answers instanceof Array && truths instanceof Array) {
+  if (
+    typeof answers === "object" &&
+    typeof truths === "object" &&
+    typeof comparison === "string"
+  ) {
     parsed.tests = `
     <h3>Test Cases</h3>
     `;
@@ -140,14 +146,16 @@ function parseExecutionResults(results: Object, command: string): string {
   // Format Status
 
   let runtime_percentile = pop(results, "runtime_percentile");
-  if (runtime_percentile) {
+  if (typeof runtime_percentile === "number") {
+    runtime_percentile = runtime_percentile.toFixed(5);
     runtime_percentile = `<li>Runtime Percentile: ${runtime_percentile}</li>`;
   } else {
     runtime_percentile = "";
   }
 
   let memory_percentile = pop(results, "memory_percentile");
-  if (memory_percentile) {
+  if (typeof memory_percentile === "number") {
+    memory_percentile = memory_percentile.toFixed(5);
     memory_percentile = `<li>Memory Percentile: ${memory_percentile}</li>`;
   } else {
     memory_percentile = "";
@@ -156,7 +164,6 @@ function parseExecutionResults(results: Object, command: string): string {
   parsed.status = `
   <h3>${command} Status</h3>
   <ul>
-  <li>Elapsed Time: ${pop(results, "elapsed_time")}</li>
   <li>Runtime Status: ${pop(results, "status_runtime")}</li>
   <li>Memory Status: ${pop(results, "status_memory")}</li>
   ${runtime_percentile}
@@ -216,7 +223,7 @@ function parseExecutionResults(results: Object, command: string): string {
   return formatted;
 }
 
-function pop(object: Object, key: string): string | [] {
+function pop(object: Object, key: string): string | number | [] {
   let value = "";
   if (key in object) {
     value = object[key];

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import * as vscode from "vscode";
-import { LeetCodeGraphAPI } from "./leetCodeGraphAPI";
+import { LeetCodeGraphAPI } from "./leetcodeGraphAPI";
 
 export class LeetCodeJudgeAPI {
   cookie = "";
@@ -15,13 +15,25 @@ export class LeetCodeJudgeAPI {
     });
   }
 
-  async checkRun(interpretId: string, slug: string) {
-    const url = `https://leetcode.com/submissions/detail/${interpretId}/check/`;
+  async checkStatus(checkId: string, slug: string) {
+    const url = `https://leetcode.com/submissions/detail/${checkId}/check/`;
 
     return this.judgeAPICall(url, slug, null);
   }
 
-  async submitRun(id: number, slug: string, code: string) {
+  async submitSolution(id: number, slug: string, code: string) {
+    const body = JSON.stringify({
+      lang: "python3",
+      question_id: id,
+      typed_code: code,
+    });
+
+    const url = `https://leetcode.com/problems/${slug}/submit/`;
+
+    return this.judgeAPICall(url, slug, body);
+  }
+
+  async runSolution(id: number, slug: string, code: string) {
     let tests = await this.ltGraph.fetchTests(slug);
     tests = tests.data.question.exampleTestcaseList.join("\n");
 

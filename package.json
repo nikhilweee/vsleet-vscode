@@ -23,15 +23,49 @@
       },
       {
         "command": "vsleet.run",
-        "title": "VSLeet: Run Solution"
+        "title": "VSLeet: Run Solution",
+        "icon": {
+          "light": "media/leetcode-light.svg",
+          "dark": "media/leetcode-dark.svg"
+        }
+      },
+      {
+        "command": "vsleet.submit",
+        "title": "VSLeet: Submit Solution",
+        "icon": {
+          "light": "media/leetcode-light.svg",
+          "dark": "media/leetcode-dark.svg"
+        }
       }
     ],
+    "menus": {
+      "editor/title/run": [
+        {
+          "command": "vsleet.run",
+          "title": "VSLeet: Run Solution",
+          "group": "2_leetcode",
+          "when": "editorFocus"
+        },
+        {
+          "command": "vsleet.submit",
+          "title": "VSLeet: Submit Solution",
+          "group": "2_leetcode",
+          "when": "editorFocus"
+        }
+      ]
+    },
     "keybindings": [
       {
         "command": "vsleet.run",
         "key": "ctrl+enter",
         "mac": "cmd+enter",
-        "when": "editorTextFocus"
+        "when": "editorFocus"
+      },
+      {
+        "command": "vsleet.run",
+        "key": "ctrl+shift+enter",
+        "mac": "cmd+shift+enter",
+        "when": "editorFocus"
       }
     ]
   },

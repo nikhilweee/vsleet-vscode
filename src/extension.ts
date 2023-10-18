@@ -21,6 +21,11 @@ export function activate(context: vscode.ExtensionContext) {
       submit.handleRun(context);
     })
   );
+  context.subscriptions.push(
+    vscode.commands.registerCommand("vsleet.submit", () => {
+      submit.handleSubmit(context);
+    })
+  );
 }
 
 export function deactivate() {}

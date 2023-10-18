@@ -9,16 +9,61 @@ interface Object {
 }
 
 export async function handleRun(context: vscode.ExtensionContext) {
+  ltJudge = new LeetCodeJudgeAPI(context);
+
+  const { id, slug, code } = parseEditor();
+
+  let res = await ltJudge.runSolution(id, slug, code);
+  const checkId = res.interpret_id;
+  await checkExecution(checkId, slug);
+}
+
+export async function handleSubmit(context: vscode.ExtensionContext) {
+  ltJudge = new LeetCodeJudgeAPI(context);
+
+  const { id, slug, code } = parseEditor();
+
+  let res = await ltJudge.submitSolution(id, slug, code);
+  const checkId = res.submission_id;
+  await checkExecution(checkId, slug);
+}
+
+async function checkExecution(checkId: string, slug: string) {
+  await vscode.window.withProgress(
+    {
+      location: vscode.ProgressLocation.Notification,
+      title: "Waiting for Judge",
+      cancellable: true,
+    },
+    async (progress, token) => {
+      for (let retries = 1; retries <= 24; retries++) {
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+        let res = await ltJudge.checkStatus(checkId, slug);
+        if (res.state === "SUCCESS") {
+          const panel = vscode.window.createWebviewPanel(
+            "leetcode",
+            "Run Results",
+            vscode.ViewColumn.Beside,
+            {}
+          );
+          panel.webview.html = parseExecutionResults(res);
+          return;
+        }
+      }
+      vscode.window.showErrorMessage("Timed out waiting for Judge");
+    }
+  );
+}
+
+function parseEditor() {
   if (!vscode.window.activeTextEditor) {
     vscode.window.showErrorMessage(
       `Cannot find active editor.
       Please run this command from 
       an active editor window.`
     );
-    return;
+    throw new Error("No active editor found.");
   }
-
-  ltJudge = new LeetCodeJudgeAPI(context);
 
   const name = vscode.window.activeTextEditor.document.fileName;
   const stem = name.split("/").pop() || "";
@@ -26,11 +71,11 @@ export async function handleRun(context: vscode.ExtensionContext) {
   const resultsName = reName.exec(stem);
   if (!resultsName || resultsName.length < 3) {
     vscode.window.showErrorMessage(
-      `Cannot parse problem information.
+      `Cannot parse problem details.
       Expected filename format is {id}-{slug}.py
       (as in 0001-two-sum.py).`
     );
-    return;
+    throw new Error("Cannot parse problem details.");
   }
 
   const slug = resultsName[2];
@@ -45,38 +90,13 @@ export async function handleRun(context: vscode.ExtensionContext) {
       Please decorate your solution between 
       # vsleet: start and # vsleet: end tags.`
     );
-    return;
+    throw new Error("Cannot find code markers.");
   }
 
-  let res = await ltJudge.submitRun(id, slug, code);
-  const interpredId = res.interpret_id;
-  await vscode.window.withProgress(
-    {
-      location: vscode.ProgressLocation.Notification,
-      title: "Waiting for Judge",
-      cancellable: true,
-    },
-    async (progress, token) => {
-      for (let retries = 1; retries <= 24; retries++) {
-        await new Promise((resolve) => setTimeout(resolve, 5000));
-        res = await ltJudge.checkRun(interpredId, slug);
-        if (res.state === "SUCCESS") {
-          const panel = vscode.window.createWebviewPanel(
-            "leetcode",
-            "Run Results",
-            vscode.ViewColumn.Beside,
-            {}
-          );
-          panel.webview.html = parseRunResults(res);
-          return;
-        }
-      }
-      vscode.window.showErrorMessage("Timed out waiting for Judge");
-    }
-  );
+  return { id: id, slug: slug, code: code };
 }
 
-function parseRunResults(results: Object): string {
+function parseExecutionResults(results: Object): string {
   const parsed: Object = {};
 
   // Format Test Cases

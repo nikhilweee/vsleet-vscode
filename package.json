@@ -1,6 +1,7 @@
 {
   "name": "vsleet",
   "displayName": "vsleet",
+  "publisher": "nikhilweee",
   "description": "Submit LeetCode problems from within VSCode",
   "version": "0.0.1",
   "engines": {
@@ -25,24 +26,24 @@
         "command": "vsleet.local",
         "title": "VS Leet: Local Solution",
         "icon": {
-          "light": "media/leetcode-light.svg",
-          "dark": "media/leetcode-dark.svg"
+          "light": "media/leetcode-light.png",
+          "dark": "media/leetcode-dark.png"
         }
       },
       {
         "command": "vsleet.run",
         "title": "VS Leet: Run Solution",
         "icon": {
-          "light": "media/leetcode-light.svg",
-          "dark": "media/leetcode-dark.svg"
+          "light": "media/leetcode-light.png",
+          "dark": "media/leetcode-dark.png"
         }
       },
       {
         "command": "vsleet.submit",
         "title": "VS Leet: Submit Solution",
         "icon": {
-          "light": "media/leetcode-light.svg",
-          "dark": "media/leetcode-dark.svg"
+          "light": "media/leetcode-light.png",
+          "dark": "media/leetcode-dark.png"
         }
       }
     ],

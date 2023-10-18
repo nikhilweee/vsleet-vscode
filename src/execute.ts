@@ -44,8 +44,7 @@ async function checkExecution(checkId: string, slug: string, command: string) {
           const panel = vscode.window.createWebviewPanel(
             "leetcode",
             `${command} Results`,
-            vscode.ViewColumn.Beside,
-            {}
+            { preserveFocus: true, viewColumn: vscode.ViewColumn.Beside }
           );
           panel.webview.html = parseExecutionResults(res, command);
           return;

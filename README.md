@@ -2,6 +2,10 @@
 
 VS Code extension for solving LeetCode problems right from the editor
 
+## Walkthrough
+
+![VS Leet Walkthrough](https://i.imgur.com/r4ErS0z.gif)
+
 ## Commands
 
 - `VS Leet: Load Problem`: Load a problem from LeetCode
@@ -31,7 +35,7 @@ csrftoken=ABCDEF1234567890;LEETCODE_SESSION=ABCDEF1234567890;
 
 Specifically, the `csrftoken` and `LEETCODE_SOLUTION` cookies are required.
 
-## Limitations
+## Known Limitations
 
-- The `VS Leet: Run Solution` command only works with the default test cases.
-  They cannot be changed as of now.
+- The `VS Leet: Run Solution` command only works with the default test cases. It
+  is not possible to add custom test cases as of now.

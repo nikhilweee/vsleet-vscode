@@ -31,24 +31,24 @@
         "command": "vsleet.local",
         "title": "VS Leet: Local Solution",
         "icon": {
-          "light": "media/leetcode-light.png",
-          "dark": "media/leetcode-dark.png"
+          "light": "media/vsleet-light.png",
+          "dark": "media/vsleet-dark.png"
         }
       },
       {
         "command": "vsleet.run",
         "title": "VS Leet: Run Solution",
         "icon": {
-          "light": "media/leetcode-light.png",
-          "dark": "media/leetcode-dark.png"
+          "light": "media/vsleet-light.png",
+          "dark": "media/vsleet-dark.png"
         }
       },
       {
         "command": "vsleet.submit",
         "title": "VS Leet: Submit Solution",
         "icon": {
-          "light": "media/leetcode-light.png",
-          "dark": "media/leetcode-dark.png"
+          "light": "media/vsleet-light.png",
+          "dark": "media/vsleet-dark.png"
         }
       }
     ],

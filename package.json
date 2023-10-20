@@ -4,10 +4,10 @@
   "publisher": "nikhilweee",
   "repository": {
     "type": "git",
-    "url": "https://github.com/nikhilweee/vsleet.git"
+    "url": "https://github.com/nikhilweee/vsleet-vscode.git"
   },
   "icon": "media/vsleet.png",
-  "description": "Submit LeetCode problems from within VSCode",
+  "description": "Submit LeetCode problems directly from VSCode",
   "version": "0.0.7",
   "engines": {
     "vscode": "^1.83.0"
@@ -15,21 +15,24 @@
   "categories": [
     "Other"
   ],
+  "license": "MIT",
+  "keywords": ["leetcode"],
+  "preview": true,
   "activationEvents": [],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
         "command": "vsleet.load",
-        "title": "VS Leet: Load Problem"
+        "title": "vsleet: Load Problem"
       },
       {
         "command": "vsleet.login",
-        "title": "VS Leet: Paste Cookie"
+        "title": "vsleet: Paste Cookie"
       },
       {
         "command": "vsleet.local",
-        "title": "VS Leet: Local Solution",
+        "title": "vsleet: Local Solution",
         "icon": {
           "light": "media/vsleet-light.png",
           "dark": "media/vsleet-dark.png"
@@ -37,7 +40,7 @@
       },
       {
         "command": "vsleet.run",
-        "title": "VS Leet: Run Solution",
+        "title": "vsleet: Run Solution",
         "icon": {
           "light": "media/vsleet-light.png",
           "dark": "media/vsleet-dark.png"
@@ -45,7 +48,7 @@
       },
       {
         "command": "vsleet.submit",
-        "title": "VS Leet: Submit Solution",
+        "title": "vsleet: Submit Solution",
         "icon": {
           "light": "media/vsleet-light.png",
           "dark": "media/vsleet-dark.png"
@@ -98,7 +101,8 @@
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
-    "test": "node ./out/test/runTest.js"
+    "test": "node ./out/test/runTest.js",
+    "publish": "vsce publish patch"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.2",

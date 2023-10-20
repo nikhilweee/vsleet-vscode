@@ -33,7 +33,7 @@ async function checkExecution(checkId: string, slug: string, command: string) {
   await vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Notification,
-      title: `VS Leet ${command}: Waiting for Judge`,
+      title: `vsleet ${command}: Waiting for Judge`,
       cancellable: true,
     },
     async (progress, token) => {
@@ -51,7 +51,7 @@ async function checkExecution(checkId: string, slug: string, command: string) {
         }
       }
       vscode.window.showErrorMessage(
-        `VS Leet ${command}: Timed out waiting for Judge.`
+        `vsleet ${command}: Timed out waiting for Judge.`
       );
     }
   );

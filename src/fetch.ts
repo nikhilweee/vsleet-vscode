@@ -225,8 +225,8 @@ function generateCode(
   code += `if __name__ == "__main__":\n`;
   code += `  solution = Solution()\n`;
   code += `  for testcase in testcases:\n`;
-  code += `    result = solution.${meta.name}(**testcase)\n`;
   code += `    print(testcase)\n`;
+  code += `    result = solution.${meta.name}(**testcase)\n`;
   code += `    print(result)\n`;
 
   return code;

@@ -113,7 +113,11 @@ async function handleAccept(input: vscode.QuickPick<ProblemItem>) {
     content: fileContents,
     language: "python",
   });
-  vscode.window.showTextDocument(document, vscode.ViewColumn.Active);
+  vscode.window
+    .showTextDocument(document, vscode.ViewColumn.Active)
+    .then(() => {
+      vscode.commands.executeCommand("editor.action.formatDocument");
+    });
 
   // Fetch problem description
   res = await ltGraph.fetchProblem(activeItem.slug);
@@ -195,8 +199,11 @@ function generateCode(
   // Format editor snippet
   let code = `# ${fileName}\n\n`;
   code += `# ${url}\n\n`;
+  code += "from typing import List, Dict\n\n";
   code += "# vsleet: start\n\n";
-  code += `${snippet}\n\n`;
+  code += `${snippet}`;
+  // pass is already indented
+  code += "pass\n\n";
   code += "# vsleet: end\n\n";
   code += "# Default Test Cases\n\n";
 

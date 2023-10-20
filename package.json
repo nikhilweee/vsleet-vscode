@@ -62,17 +62,17 @@
         {
           "command": "vsleet.local",
           "group": "2_leetcode",
-          "when": "editorFocus"
+          "when": "editorTextFocus"
         },
         {
           "command": "vsleet.run",
           "group": "2_leetcode",
-          "when": "editorFocus"
+          "when": "editorTextFocus"
         },
         {
           "command": "vsleet.submit",
           "group": "2_leetcode",
-          "when": "editorFocus"
+          "when": "editorTextFocus"
         }
       ]
     },
@@ -81,19 +81,19 @@
         "command": "vsleet.local",
         "key": "shift+enter",
         "mac": "shift+enter",
-        "when": "editorFocus"
+        "when": "editorTextFocus"
       },
       {
         "command": "vsleet.run",
         "key": "ctrl+enter",
         "mac": "cmd+enter",
-        "when": "editorFocus"
+        "when": "editorTextFocus"
       },
       {
         "command": "vsleet.submit",
         "key": "ctrl+shift+enter",
         "mac": "cmd+shift+enter",
-        "when": "editorFocus"
+        "when": "editorTextFocus"
       }
     ]
   },

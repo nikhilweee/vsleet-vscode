@@ -104,8 +104,7 @@ async function handleAccept(input: vscode.QuickPick<ProblemItem>) {
     snippet = { langSlug: "python3", code: "" };
   }
 
-  const fileName = `${activeItem.id}-${activeItem.slug}.py`;
-  const fileContents = generateCode(fileName, snippet.code, tests, meta);
+  const fileContents = generateCode(activeItem, snippet.code, tests, meta);
 
   // Open existing or create new file
   // const document = await getTextDocument(fileName, fileContents);
@@ -185,13 +184,17 @@ function generateHTML(content: string) {
 }
 
 function generateCode(
-  fileName: string,
+  activeItem: ProblemItem,
   snippet: string,
   tests: string[],
   meta: Meta
 ) {
+  const fileName = `${activeItem.id}-${activeItem.slug}.py`;
+  const url = `https://leetcode.com/problems/${activeItem.slug}`;
+
   // Format editor snippet
   let code = `# ${fileName}\n\n`;
+  code += `# ${url}\n\n`;
   code += "# vsleet: start\n\n";
   code += `${snippet}\n\n`;
   code += "# vsleet: end\n\n";

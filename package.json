@@ -8,7 +8,7 @@
   },
   "icon": "media/vsleet.png",
   "description": "Submit LeetCode problems directly from VSCode",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "engines": {
     "vscode": "^1.83.0"
   },
@@ -16,7 +16,9 @@
     "Other"
   ],
   "license": "MIT",
-  "keywords": ["leetcode"],
+  "keywords": [
+    "leetcode"
+  ],
   "preview": true,
   "activationEvents": [],
   "main": "./out/extension.js",

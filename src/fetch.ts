@@ -125,9 +125,9 @@ async function handleAccept(input: vscode.QuickPick<ProblemItem>) {
     "leetcode",
     activeItem.title,
     vscode.ViewColumn.Beside,
-    {}
+    { enableScripts: true }
   );
-  panel.webview.html = generateHTML(res.data.question.content);
+  panel.webview.html = generateHTML(activeItem, res.data.question.content);
 }
 
 async function getTextDocument(fileName: string, fileContents: string) {
@@ -175,14 +175,60 @@ async function getTextDocument(fileName: string, fileContents: string) {
   return document;
 }
 
-function generateHTML(content: string) {
+function generateHTML(activeItem: ProblemItem, content: string) {
   const html = `
   <html>
   <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>pre { white-space: pre-wrap; }</style>
+  <style>
+    pre { white-space: pre-wrap; }
+    header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+    }
+    header > * { display: inline-block; }
+  </style>
   </head>
-  <body>${content}</body>
+  <body>
+  <header>
+    <h3>${activeItem.title}</h3>
+    <span id="stopwatch">00:00:00</span>
+  </header>
+  <main>${content}</main>
+  <script>
+  let start = Date.now();
+  let intervalID = null;
+  const display = document.getElementById("stopwatch");
+  function setEmoji(emoji) {
+    display.innerHTML = display.innerHTML.replace(/\\p{S}/gu, emoji);
+  }
+  function startStopwatch() {
+    intervalID = setInterval(() => {
+      const ms = Date.now() - start;
+      display.dataset.ms = ms;
+      const elapsed = new Date(ms).toISOString().slice(11, 19);
+      display.innerHTML = "⏸ " + elapsed;
+    }, 500);
+  }
+  function clickStopwatch() {
+    if (intervalID) {
+      clearInterval(intervalID);
+      setEmoji("▶");
+      intervalID = null;
+    } else {
+      const ms = display.dataset.ms;
+      start = Date.now() - ms;
+      setEmoji("⏸");
+      startStopwatch();
+    }
+  }
+  document.addEventListener("DOMContentLoaded", () => {
+    startStopwatch();
+    display.addEventListener("click", clickStopwatch);
+  });
+  </script>
+  </body>
   </html>`;
   return html;
 }
@@ -225,9 +271,9 @@ function generateCode(
   code += `if __name__ == "__main__":\n`;
   code += `  solution = Solution()\n`;
   code += `  for testcase in testcases:\n`;
-  code += `    print(testcase)\n`;
+  code += `    print("testcase:", testcase)\n`;
   code += `    result = solution.${meta.name}(**testcase)\n`;
-  code += `    print(result)\n`;
+  code += `    print("result:", result)\n`;
 
   return code;
 }

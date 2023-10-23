@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import * as vscode from "vscode";
+import * as JSON5 from "json5";
 import { LeetCodeJudgeAPI } from "./leetcodeJudgeAPI";
 import { Object } from "./interfaces";
 
@@ -10,23 +11,30 @@ export async function handleLocal() {
 }
 
 export async function handleRun(context: vscode.ExtensionContext) {
-  ltJudge = new LeetCodeJudgeAPI(context);
+  ltJudge = new LeetCodeJudgeAPI();
+  await ltJudge.setContext(context);
 
-  const { id, slug, code } = parseEditor();
+  const parsed = parseEditor();
 
-  let res = await ltJudge.runSolution(id, slug, code);
+  let res = await ltJudge.runSolution(
+    parsed.id,
+    parsed.slug,
+    parsed.code,
+    parsed.tests
+  );
   const checkId = res.interpret_id;
-  await checkExecution(checkId, slug, "Run");
+  await checkExecution(checkId, parsed.slug, "Run");
 }
 
 export async function handleSubmit(context: vscode.ExtensionContext) {
-  ltJudge = new LeetCodeJudgeAPI(context);
+  ltJudge = new LeetCodeJudgeAPI();
+  await ltJudge.setContext(context);
 
-  const { id, slug, code } = parseEditor();
+  const parsed = parseEditor();
 
-  let res = await ltJudge.submitSolution(id, slug, code);
+  let res = await ltJudge.submitSolution(parsed.id, parsed.slug, parsed.code);
   const checkId = res.submission_id;
-  await checkExecution(checkId, slug, "Submission");
+  await checkExecution(checkId, parsed.slug, "Submission");
 }
 
 async function checkExecution(checkId: string, slug: string, command: string) {
@@ -68,6 +76,7 @@ function parseEditor() {
   }
 
   const text = vscode.window.activeTextEditor.document.getText();
+
   const reName = RegExp("# (\\d*)-([\\w-]*).py");
   const resultsName = reName.exec(text);
   if (!resultsName || resultsName.length < 3) {
@@ -78,24 +87,51 @@ function parseEditor() {
     );
     throw new Error("Cannot parse problem details.");
   }
-
   const slug = resultsName[2];
   const id = parseInt(resultsName[1]);
 
-  const reCode = RegExp("# vsleet: start(.*)# vsleet: end", "gms");
+  const reCode = RegExp("# vsleet:code:start(.*)# vsleet:code:end", "gms");
   const resultsCode = reCode.exec(text);
   if (!resultsCode || resultsCode.length < 2) {
     vscode.window.showErrorMessage(
       `Cannot find code markers.
       Please write your solution between
-      # vsleet: start and # vsleet: end tags.`
+      # vsleet:code:start and # vsleet:code:end tags.`
     );
     throw new Error("Cannot find code markers.");
   }
-
   const code = resultsCode[1];
 
-  return { id: id, slug: slug, code: code };
+  const reTests = RegExp("# vsleet:tests:start(.*)# vsleet:tests:end", "gms");
+  const resultsTests = reTests.exec(text);
+  if (!resultsTests || resultsTests.length < 2) {
+    vscode.window.showErrorMessage(
+      `Cannot find test markers.
+      Please write your solution between
+      # vsleet:tests:start and # vsleet:tests:end tags.`
+    );
+    throw new Error("Cannot find test markers.");
+  }
+
+  const testCases = resultsTests[1];
+  const reTestCases = RegExp("\\[(.*)\\]", "gms");
+  const resultsTestCases = reTestCases.exec(testCases);
+  if (!resultsTestCases || resultsTestCases.length < 2) {
+    vscode.window.showErrorMessage(`Cannot parse test cases.`);
+    throw new Error("Cannot parse test cases.");
+  }
+
+  const testsJSON = JSON5.parse(resultsTestCases[0]);
+  let tests = "";
+  testsJSON.forEach((testcase: Object) => {
+    for (let value of Object.values(testcase)) {
+      tests += JSON.stringify(value);
+      tests += "\n";
+    }
+  });
+  tests = tests.trim();
+
+  return { id: id, slug: slug, code: code, tests: tests };
 }
 
 function parseExecutionResults(results: Object, command: string): string {
@@ -136,7 +172,7 @@ function parseExecutionResults(results: Object, command: string): string {
   const num_correct = pop(results, "total_correct");
   const status_msg = pop(results, "status_msg");
 
-  if (num_correct && num_total) {
+  if (num_total) {
     parsed.heading = `<h2>${status_msg}: ${num_correct} / ${num_total}</h2>`;
   } else {
     parsed.heading = `<h2>${status_msg}</h2>`;

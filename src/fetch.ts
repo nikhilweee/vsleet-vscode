@@ -41,7 +41,8 @@ class ProblemItem implements vscode.QuickPickItem {
 let ltGraph: LeetCodeGraphAPI;
 
 export async function handleLoad(context: vscode.ExtensionContext) {
-  ltGraph = new LeetCodeGraphAPI(context);
+  ltGraph = new LeetCodeGraphAPI();
+  await ltGraph.setContext(context);
   const disposables: vscode.Disposable[] = [];
   const input = vscode.window.createQuickPick<ProblemItem>();
   input.placeholder = "Search Keywords";
@@ -239,19 +240,22 @@ function generateCode(
   tests: string[],
   meta: Meta
 ) {
-  const fileName = `${activeItem.id}-${activeItem.slug}.py`;
-  const url = `https://leetcode.com/problems/${activeItem.slug}`;
+  const extension = vscode.extensions.getExtension("nikhilweee.vsleet");
+  const version = extension?.packageJSON.version;
 
   // Format editor snippet
-  let code = `# ${fileName}\n\n`;
-  code += `# ${url}\n\n`;
+  let code = `# ${activeItem.id}-${activeItem.slug}.py\n\n`;
+  code += `# https://leetcode.com/problems/${activeItem.slug}/\n\n`;
+  code += `# This file was auto-generated using the vsleet extension version ${version}\n`;
+  code += `# https://marketplace.visualstudio.com/items?itemName=nikhilweee.vsleet\n\n`;
+  code += `# Write your solution between vsleet:code:start and vsleet:code:end.\n\n`;
   code += "from typing import List, Dict\n\n";
-  code += "# vsleet: start\n\n";
+  code += "# vsleet:code:start\n\n";
   code += `${snippet}`;
   // pass is already indented
   code += "pass\n\n";
-  code += "# vsleet: end\n\n";
-  code += "# Default Test Cases\n\n";
+  code += "# vsleet:code:end\n\n";
+  code += "# vsleet:tests:start\n\n";
 
   // Format test cases
   let testCases: Object[] = [];
@@ -267,7 +271,7 @@ function generateCode(
 
   // Format main block
   code += `testcases = ${testString}\n\n`;
-  code += `# Run Code Locally\n\n`;
+  code += `# vsleet:tests:end\n\n`;
   code += `if __name__ == "__main__":\n`;
   code += `  solution = Solution()\n`;
   code += `  for testcase in testcases:\n`;

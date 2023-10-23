@@ -5,12 +5,13 @@ import { Object } from "./interfaces";
 export class LeetCodeGraphAPI {
   cookie = "";
 
-  constructor(context: vscode.ExtensionContext) {
-    context.secrets.get("cookie").then((cookie) => {
-      if (cookie) {
-        this.cookie = cookie;
-      }
-    });
+  constructor() {}
+
+  async setContext(context: vscode.ExtensionContext) {
+    const cookie = await context.secrets.get("cookie");
+    if (cookie) {
+      this.cookie = cookie;
+    }
   }
 
   async searchProblems(keywords: string) {

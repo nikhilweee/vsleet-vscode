@@ -1,18 +1,16 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import * as vscode from "vscode";
-import { LeetCodeGraphAPI } from "./leetcodeGraphAPI";
 
 export class LeetCodeJudgeAPI {
   cookie = "";
-  ltGraph: LeetCodeGraphAPI;
 
-  constructor(context: vscode.ExtensionContext) {
-    this.ltGraph = new LeetCodeGraphAPI(context);
-    context.secrets.get("cookie").then((cookie) => {
-      if (cookie) {
-        this.cookie = cookie;
-      }
-    });
+  constructor() {}
+
+  async setContext(context: vscode.ExtensionContext) {
+    const cookie = await context.secrets.get("cookie");
+    if (cookie) {
+      this.cookie = cookie;
+    }
   }
 
   async checkStatus(checkId: string, slug: string) {
@@ -22,10 +20,6 @@ export class LeetCodeJudgeAPI {
   }
 
   async submitSolution(id: number, slug: string, code: string) {
-    // TODO: Hack to prevent cookies not being set
-    let tests = await this.ltGraph.fetchTests(slug);
-    tests = tests.data.question.exampleTestcaseList.join("\n");
-
     const body = JSON.stringify({
       lang: "python3",
       question_id: id,
@@ -37,14 +31,7 @@ export class LeetCodeJudgeAPI {
     return this.judgeAPICall(url, slug, body);
   }
 
-  async runSolution(id: number, slug: string, code: string) {
-    let tests = await this.ltGraph.fetchTests(slug);
-    if (!tests.data.question) {
-      vscode.window.showErrorMessage(`Cannot fetch example testcases.`);
-      throw new Error("Cannot fetch example testcases.");
-    }
-    tests = tests.data.question.exampleTestcaseList.join("\n");
-
+  async runSolution(id: number, slug: string, code: string, tests: string) {
     const body = JSON.stringify({
       data_input: tests,
       lang: "python3",

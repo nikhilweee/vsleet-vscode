@@ -2,8 +2,15 @@
 
 All notable changes to the "vsleet" extension will be documented in this file.
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
+Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how
+to structure this file.
 
 ## [Unreleased]
 
-- Initial release
+- Initial Release
+- Update README and create a new icon.
+- Add question URLs in the boilerplate.
+- Format the boilerplate solution after loading.
+- Print testcases before running the solution.
+- Added a tiny stopwatch on top of the problem details page.
+- Parse problem details from comment instead of the file name.

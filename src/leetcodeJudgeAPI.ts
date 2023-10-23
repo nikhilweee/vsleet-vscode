@@ -39,6 +39,10 @@ export class LeetCodeJudgeAPI {
 
   async runSolution(id: number, slug: string, code: string) {
     let tests = await this.ltGraph.fetchTests(slug);
+    if (!tests.data.question) {
+      vscode.window.showErrorMessage(`Cannot fetch example testcases.`);
+      throw new Error("Cannot fetch example testcases.");
+    }
     tests = tests.data.question.exampleTestcaseList.join("\n");
 
     const body = JSON.stringify({

@@ -67,14 +67,13 @@ function parseEditor() {
     throw new Error("No active editor found.");
   }
 
-  const name = vscode.window.activeTextEditor.document.fileName;
-  const stem = name.split("/").pop() || "";
-  const reName = RegExp("(\\d*)-([\\w-]*).py");
-  const resultsName = reName.exec(stem);
+  const firstLine = vscode.window.activeTextEditor.document.lineAt(0).text;
+  const reName = RegExp("# (\\d*)-([\\w-]*).py");
+  const resultsName = reName.exec(firstLine);
   if (!resultsName || resultsName.length < 3) {
     vscode.window.showErrorMessage(
       `Cannot parse problem details.
-      Expected filename format is {id}-{slug}.py
+      Expected first line comment: {id}-{slug}.py
       (as in 0001-two-sum.py).`
     );
     throw new Error("Cannot parse problem details.");
@@ -138,9 +137,11 @@ function parseExecutionResults(results: Object, command: string): string {
   const num_correct = pop(results, "total_correct");
   const status_msg = pop(results, "status_msg");
 
-  parsed.heading = `
-  <h2>${status_msg}: ${num_correct} / ${num_total}</h2>
-  `;
+  if (num_correct && num_total) {
+    parsed.heading = `<h2>${status_msg}: ${num_correct} / ${num_total}</h2>`;
+  } else {
+    parsed.heading = `<h2>${status_msg}</h2>`;
+  }
 
   // Format Status
 

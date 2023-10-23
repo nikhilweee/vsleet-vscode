@@ -67,14 +67,14 @@ function parseEditor() {
     throw new Error("No active editor found.");
   }
 
-  const firstLine = vscode.window.activeTextEditor.document.lineAt(0).text;
+  const text = vscode.window.activeTextEditor.document.getText();
   const reName = RegExp("# (\\d*)-([\\w-]*).py");
-  const resultsName = reName.exec(firstLine);
+  const resultsName = reName.exec(text);
   if (!resultsName || resultsName.length < 3) {
     vscode.window.showErrorMessage(
       `Cannot parse problem details.
-      Expected first line comment: {id}-{slug}.py
-      (as in 0001-two-sum.py).`
+      Please include a comment line: # {id}-{slug}.py
+      (for example: # 0001-two-sum.py).`
     );
     throw new Error("Cannot parse problem details.");
   }
@@ -82,13 +82,12 @@ function parseEditor() {
   const slug = resultsName[2];
   const id = parseInt(resultsName[1]);
 
-  let rawCode = vscode.window.activeTextEditor.document.getText();
   const reCode = RegExp("# vsleet: start(.*)# vsleet: end", "gms");
-  const resultsCode = reCode.exec(rawCode);
+  const resultsCode = reCode.exec(text);
   if (!resultsCode || resultsCode.length < 2) {
     vscode.window.showErrorMessage(
       `Cannot find code markers.
-      Please decorate your solution between 
+      Please write your solution between
       # vsleet: start and # vsleet: end tags.`
     );
     throw new Error("Cannot find code markers.");

@@ -14,3 +14,4 @@ to structure this file.
 - Print testcases before running the solution.
 - Added a tiny stopwatch on top of the problem details page.
 - Parse problem details from comment instead of the file name.
+- Read test cases from source file.

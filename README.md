@@ -66,5 +66,3 @@ Specifically, the `csrftoken` and `LEETCODE_SESSION` cookies are required.
 ## Known Limitations
 
 - The extension only supports `python3` for now.
-- The `vsleet: Run Solution` command only works with the default test cases. It
-  is not possible to add custom test cases as of now.

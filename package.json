@@ -117,5 +117,8 @@
     "glob": "^10.3.3",
     "mocha": "^10.2.0",
     "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "json5": "^2.2.3"
   }
 }

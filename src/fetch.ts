@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import * as vscode from "vscode";
 import { posix } from "path";
-import { LeetCodeGraphAPI } from "./leetcodeGraphAPI";
+import { LeetCodeGraphAPI } from "./api/graph";
 import { Object, Question, Snippet, Meta } from "./interfaces";
 
 class ProblemItem implements vscode.QuickPickItem {

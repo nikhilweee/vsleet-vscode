@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import * as vscode from "vscode";
 import * as JSON5 from "json5";
-import { LeetCodeJudgeAPI } from "./leetcodeJudgeAPI";
+import { LeetCodeJudgeAPI } from "./api/judge";
 import { Object } from "./interfaces";
 
 let ltJudge: LeetCodeJudgeAPI;
@@ -20,10 +20,10 @@ export async function handleRun(context: vscode.ExtensionContext) {
     parsed.id,
     parsed.slug,
     parsed.code,
-    parsed.tests
+    parsed.testStr
   );
   const checkId = res.interpret_id;
-  await checkExecution(checkId, parsed.slug, "Run");
+  await checkExecution(checkId, parsed.slug, parsed.testJSON, "Run");
 }
 
 export async function handleSubmit(context: vscode.ExtensionContext) {
@@ -34,10 +34,15 @@ export async function handleSubmit(context: vscode.ExtensionContext) {
 
   let res = await ltJudge.submitSolution(parsed.id, parsed.slug, parsed.code);
   const checkId = res.submission_id;
-  await checkExecution(checkId, parsed.slug, "Submission");
+  await checkExecution(checkId, parsed.slug, [], "Submission");
 }
 
-async function checkExecution(checkId: string, slug: string, command: string) {
+async function checkExecution(
+  checkId: string,
+  slug: string,
+  testJSON: Object[],
+  command: string
+) {
   await vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Notification,
@@ -54,7 +59,7 @@ async function checkExecution(checkId: string, slug: string, command: string) {
             `${command} Results`,
             { preserveFocus: true, viewColumn: vscode.ViewColumn.Beside }
           );
-          panel.webview.html = parseExecutionResults(res, command);
+          panel.webview.html = parseExecutionResults(res, command, testJSON);
           return;
         }
       }
@@ -121,20 +126,30 @@ function parseEditor() {
     throw new Error("Cannot parse test cases.");
   }
 
-  const testsJSON = JSON5.parse(resultsTestCases[0]);
-  let tests = "";
-  testsJSON.forEach((testcase: Object) => {
+  const testJSON = JSON5.parse(resultsTestCases[0]);
+  let testStr = "";
+  testJSON.forEach((testcase: Object) => {
     for (let value of Object.values(testcase)) {
-      tests += JSON.stringify(value);
-      tests += "\n";
+      testStr += JSON.stringify(value);
+      testStr += "\n";
     }
   });
-  tests = tests.trim();
+  testStr = testStr.trim();
 
-  return { id: id, slug: slug, code: code, tests: tests };
+  return {
+    id: id,
+    slug: slug,
+    code: code,
+    testStr: testStr,
+    testJSON: testJSON,
+  };
 }
 
-function parseExecutionResults(results: Object, command: string): string {
+function parseExecutionResults(
+  results: Object,
+  command: string,
+  testJSON: Object[]
+): string {
   const parsed: Object = {};
 
   // Format Test Cases
@@ -155,9 +170,11 @@ function parseExecutionResults(results: Object, command: string): string {
     `;
     answers.map((answer, i) => {
       const expected = truths[i];
-      const compare = comparison[i];
+      const compare = comparison[i] === "1" ? "🟢" : "🔴";
+      const test = JSON.stringify(testJSON[i]);
       parsed.tests += `
       <pre>
+      Input:   : ${test}
       Expected : ${expected}
       Answer   : ${answer}
       Correct  : ${compare}

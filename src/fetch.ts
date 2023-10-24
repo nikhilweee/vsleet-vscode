@@ -131,51 +131,6 @@ async function handleAccept(input: vscode.QuickPick<ProblemItem>) {
   panel.webview.html = generateHTML(activeItem, res.data.question.content);
 }
 
-async function getTextDocument(fileName: string, fileContents: string) {
-  let document: vscode.TextDocument;
-
-  if (!vscode.workspace.workspaceFolders) {
-    // No workspace found. Don't create new file on disk.
-    return await vscode.workspace.openTextDocument({
-      content: fileContents,
-      language: "python",
-    });
-  }
-
-  const folderUri = vscode.workspace.workspaceFolders[0].uri;
-  const fileUri = folderUri.with({
-    path: posix.join(folderUri.path, fileName),
-  });
-
-  // Check if file exists on disk
-  let fileExists = true;
-  try {
-    const stat = await vscode.workspace.fs.stat(fileUri);
-  } catch (error) {
-    fileExists = false;
-  }
-
-  if (fileExists) {
-    // Open existing file from disk
-    document = await vscode.workspace.openTextDocument(fileUri);
-  } else {
-    // Try to create a new file on disk
-    const data = Buffer.from(fileContents, "utf-8");
-    try {
-      await vscode.workspace.fs.writeFile(fileUri, data);
-      document = await vscode.workspace.openTextDocument(fileUri);
-    } catch (error) {
-      // Open untitled file
-      document = await vscode.workspace.openTextDocument({
-        content: fileContents,
-        language: "python",
-      });
-    }
-  }
-
-  return document;
-}
-
 function generateHTML(activeItem: ProblemItem, content: string) {
   const html = `
   <html>

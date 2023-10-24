@@ -2,16 +2,20 @@
 import * as vscode from "vscode";
 import { Object } from "../interfaces";
 
-export class LeetCodeGraphAPI {
-  cookie = "";
+export class LTGraphAPI {
+  private cookie = "";
+  private static instance: LTGraphAPI;
 
-  constructor() {}
-
-  async setContext(context: vscode.ExtensionContext) {
-    const cookie = await context.secrets.get("cookie");
-    if (cookie) {
-      this.cookie = cookie;
+  public static async getInstance(context: vscode.ExtensionContext) {
+    if (!LTGraphAPI.instance) {
+      LTGraphAPI.instance = new LTGraphAPI();
+      // Set cookie for a new instance
+      const cookie = await context.secrets.get("cookie");
+      if (cookie) {
+        LTGraphAPI.instance.cookie = cookie;
+      }
     }
+    return LTGraphAPI.instance;
   }
 
   async searchProblems(keywords: string) {

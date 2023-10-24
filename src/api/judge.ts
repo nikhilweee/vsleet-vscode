@@ -1,10 +1,22 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import * as vscode from "vscode";
 
-export class LeetCodeJudgeAPI {
-  cookie = "";
+export class LTJudgeAPI {
+  private cookie = "";
 
-  constructor() {}
+  private static instance: LTJudgeAPI;
+
+  public static async getInstance(context: vscode.ExtensionContext) {
+    if (!LTJudgeAPI.instance) {
+      LTJudgeAPI.instance = new LTJudgeAPI();
+      // Set cookie for a new instance
+      const cookie = await context.secrets.get("cookie");
+      if (cookie) {
+        LTJudgeAPI.instance.cookie = cookie;
+      }
+    }
+    return LTJudgeAPI.instance;
+  }
 
   async setContext(context: vscode.ExtensionContext) {
     const cookie = await context.secrets.get("cookie");

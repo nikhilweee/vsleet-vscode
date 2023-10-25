@@ -16,3 +16,4 @@ to structure this file.
 - Parse problem details from comment instead of the file name.
 - Read test cases from source file.
 - Show test inputs while running solution.
+- Add command to update solution template.

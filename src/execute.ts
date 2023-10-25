@@ -1,18 +1,17 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import * as vscode from "vscode";
 import * as JSON5 from "json5";
-import { LeetCodeJudgeAPI } from "./api/judge";
+import { LTJudgeAPI } from "./api/judge";
 import { Object } from "./interfaces";
 
-let ltJudge: LeetCodeJudgeAPI;
+let ltJudge: LTJudgeAPI;
 
 export async function handleLocal() {
   vscode.commands.executeCommand("python.execInTerminal");
 }
 
 export async function handleRun(context: vscode.ExtensionContext) {
-  ltJudge = new LeetCodeJudgeAPI();
-  await ltJudge.setContext(context);
+  ltJudge = await LTJudgeAPI.getInstance(context);
 
   const parsed = parseEditor();
 
@@ -27,8 +26,7 @@ export async function handleRun(context: vscode.ExtensionContext) {
 }
 
 export async function handleSubmit(context: vscode.ExtensionContext) {
-  ltJudge = new LeetCodeJudgeAPI();
-  await ltJudge.setContext(context);
+  ltJudge = await LTJudgeAPI.getInstance(context);
 
   const parsed = parseEditor();
 
@@ -70,7 +68,7 @@ async function checkExecution(
   );
 }
 
-function parseEditor() {
+export function parseEditor() {
   if (!vscode.window.activeTextEditor) {
     vscode.window.showErrorMessage(
       `Cannot find active editor.
@@ -95,7 +93,7 @@ function parseEditor() {
   const slug = resultsName[2];
   const id = parseInt(resultsName[1]);
 
-  const reCode = RegExp("# vsleet:code:start(.*)# vsleet:code:end", "gms");
+  const reCode = RegExp("# vsleet:code:start(.*)# vsleet:code:end", "gs");
   const resultsCode = reCode.exec(text);
   if (!resultsCode || resultsCode.length < 2) {
     vscode.window.showErrorMessage(
@@ -107,7 +105,7 @@ function parseEditor() {
   }
   const code = resultsCode[1];
 
-  const reTests = RegExp("# vsleet:tests:start(.*)# vsleet:tests:end", "gms");
+  const reTests = RegExp("# vsleet:tests:start(.*)# vsleet:tests:end", "gs");
   const resultsTests = reTests.exec(text);
   if (!resultsTests || resultsTests.length < 2) {
     vscode.window.showErrorMessage(
@@ -119,7 +117,7 @@ function parseEditor() {
   }
 
   const testCases = resultsTests[1];
-  const reTestCases = RegExp("\\[(.*)\\]", "gms");
+  const reTestCases = RegExp("\\[(.*)\\]", "gs");
   const resultsTestCases = reTestCases.exec(testCases);
   if (!resultsTestCases || resultsTestCases.length < 2) {
     vscode.window.showErrorMessage(`Cannot parse test cases.`);

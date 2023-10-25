@@ -18,13 +18,6 @@ export class LTJudgeAPI {
     return LTJudgeAPI.instance;
   }
 
-  async setContext(context: vscode.ExtensionContext) {
-    const cookie = await context.secrets.get("cookie");
-    if (cookie) {
-      this.cookie = cookie;
-    }
-  }
-
   async checkStatus(checkId: string, slug: string) {
     const url = `https://leetcode.com/submissions/detail/${checkId}/check/`;
 

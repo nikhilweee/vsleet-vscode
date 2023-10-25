@@ -1,10 +1,9 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import * as vscode from "vscode";
-import { posix } from "path";
-import { LeetCodeGraphAPI } from "./api/graph";
+import { LTGraphAPI } from "./api/graph";
 import { Object, Question, Snippet, Meta } from "./interfaces";
 
-class ProblemItem implements vscode.QuickPickItem {
+export class ProblemItem implements vscode.QuickPickItem {
   id: string;
   description: string;
   label: string;
@@ -38,11 +37,10 @@ class ProblemItem implements vscode.QuickPickItem {
   }
 }
 
-let ltGraph: LeetCodeGraphAPI;
+let ltGraph: LTGraphAPI;
 
 export async function handleLoad(context: vscode.ExtensionContext) {
-  ltGraph = new LeetCodeGraphAPI();
-  await ltGraph.setContext(context);
+  ltGraph = await LTGraphAPI.getInstance(context);
   const disposables: vscode.Disposable[] = [];
   const input = vscode.window.createQuickPick<ProblemItem>();
   input.placeholder = "Search Keywords";
@@ -52,7 +50,8 @@ export async function handleLoad(context: vscode.ExtensionContext) {
       handleChange(input, value);
     }),
     input.onDidAccept(async () => {
-      handleAccept(input);
+      const [activeItem] = input.activeItems;
+      handleAccept(activeItem, ltGraph);
     })
   );
   input.show();
@@ -78,9 +77,37 @@ async function handleChange(
   }
 }
 
-async function handleAccept(input: vscode.QuickPick<ProblemItem>) {
+async function handleAccept(activeItem: ProblemItem, ltGraph: LTGraphAPI) {
   let res = null;
-  const [activeItem] = input.activeItems;
+
+  const fileContents = await getCode(activeItem, ltGraph);
+
+  // Open existing or create new file
+  // const document = await getTextDocument(fileName, fileContents);
+
+  const document = await vscode.workspace.openTextDocument({
+    content: fileContents,
+    language: "python",
+  });
+  vscode.window
+    .showTextDocument(document, vscode.ViewColumn.Active)
+    .then(() => {
+      vscode.commands.executeCommand("editor.action.formatDocument");
+    });
+
+  // Fetch problem description
+  res = await ltGraph.fetchProblem(activeItem.slug);
+  const panel = vscode.window.createWebviewPanel(
+    "leetcode",
+    activeItem.title,
+    vscode.ViewColumn.Beside,
+    { enableScripts: true }
+  );
+  panel.webview.html = generateHTML(activeItem, res.data.question.content);
+}
+
+export async function getCode(activeItem: ProblemItem, ltGraph: LTGraphAPI) {
+  let res = null;
 
   // Fetch test cases
   res = await ltGraph.fetchTests(activeItem.slug);
@@ -106,29 +133,7 @@ async function handleAccept(input: vscode.QuickPick<ProblemItem>) {
   }
 
   const fileContents = generateCode(activeItem, snippet.code, tests, meta);
-
-  // Open existing or create new file
-  // const document = await getTextDocument(fileName, fileContents);
-
-  const document = await vscode.workspace.openTextDocument({
-    content: fileContents,
-    language: "python",
-  });
-  vscode.window
-    .showTextDocument(document, vscode.ViewColumn.Active)
-    .then(() => {
-      vscode.commands.executeCommand("editor.action.formatDocument");
-    });
-
-  // Fetch problem description
-  res = await ltGraph.fetchProblem(activeItem.slug);
-  const panel = vscode.window.createWebviewPanel(
-    "leetcode",
-    activeItem.title,
-    vscode.ViewColumn.Beside,
-    { enableScripts: true }
-  );
-  panel.webview.html = generateHTML(activeItem, res.data.question.content);
+  return fileContents;
 }
 
 function generateHTML(activeItem: ProblemItem, content: string) {
@@ -199,11 +204,11 @@ function generateCode(
   const version = extension?.packageJSON.version;
 
   // Format editor snippet
-  let code = `# ${activeItem.id}-${activeItem.slug}.py\n\n`;
+  let code = `# ${activeItem.id}-${activeItem.slug}.py\n`;
   code += `# https://leetcode.com/problems/${activeItem.slug}/\n\n`;
   code += `# This file was auto-generated using the vsleet extension version ${version}\n`;
   code += `# https://marketplace.visualstudio.com/items?itemName=nikhilweee.vsleet\n\n`;
-  code += `# Write your solution between vsleet:code:start and vsleet:code:end.\n\n`;
+  code += `# Write your solution between vsleet:code:start and vsleet:code:end\n\n`;
   code += "from typing import List, Dict\n\n";
   code += "# vsleet:code:start\n\n";
   code += `${snippet}`;

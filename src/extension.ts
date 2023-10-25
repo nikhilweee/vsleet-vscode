@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import * as fetch from "./fetch";
 import * as cookie from "./cookie";
 import * as execute from "./execute";
+import * as update from "./update";
 
 export function activate(context: vscode.ExtensionContext) {
   // context.secrets.store("cookie", "");
@@ -29,6 +30,11 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand("vsleet.submit", () => {
       execute.handleSubmit(context);
+    })
+  );
+  context.subscriptions.push(
+    vscode.commands.registerCommand("vsleet.update", () => {
+      update.handleUpdate(context);
     })
   );
 }

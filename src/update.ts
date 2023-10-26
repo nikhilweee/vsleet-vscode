@@ -7,7 +7,8 @@ export async function handleUpdate(context: vscode.ExtensionContext) {
   const ltGraph = await LTGraphAPI.getInstance(context);
   const parsed = parseEditor(false);
   const question = {
-    frontendQuestionId: parsed.id.toString(),
+    frontendQuestionId: "",
+    backendQuestionId: parsed.id.toString(),
     titleSlug: parsed.slug,
     acRate: 50.0,
     paidOnly: false,

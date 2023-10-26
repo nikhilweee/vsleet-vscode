@@ -19,7 +19,7 @@ export async function handleRun(context: vscode.ExtensionContext) {
     parsed.id,
     parsed.slug,
     parsed.code,
-    parsed.testStr
+    parsed.tests
   );
   const checkId = res.interpret_id;
   await checkExecution(checkId, parsed.slug, parsed.testJSON, "Run");
@@ -113,7 +113,7 @@ export function parseEditor(requireTests = true) {
     id: id,
     slug: slug,
     code: code,
-    testStr: "",
+    tests: "",
     testJSON: [],
     results: "",
   };
@@ -139,16 +139,16 @@ export function parseEditor(requireTests = true) {
     }
 
     const testJSON = JSON5.parse(resultsTestCases[0]);
-    let testStr = "";
+    let tests = "";
     testJSON.forEach((testcase: Object) => {
       for (let value of Object.values(testcase)) {
-        testStr += JSON.stringify(value);
-        testStr += "\n";
+        tests += JSON.stringify(value);
+        tests += "\n";
       }
     });
-    testStr = testStr.trim();
+    tests = tests.trim();
 
-    parsed.testStr = testStr;
+    parsed.tests = tests;
     parsed.testJSON = testJSON;
   }
 

@@ -26,7 +26,7 @@ export interface ParsedEditor {
   id: number;
   slug: string;
   code: string;
-  testStr: string;
+  tests: string;
   testJSON: Object[];
   results: string;
 }

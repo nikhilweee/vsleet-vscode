@@ -272,6 +272,13 @@ function parseResults(results: Object, command: string, testJSON: Object[]) {
 
   html.errors = "";
 
+  const invalid_testcase = pop(results, "invalid_testcase");
+  if (invalid_testcase) {
+    html.errors += `
+    <h3>Invalid Testcase</h3>
+    `;
+  }
+
   const runtime_error = pop(results, "runtime_error");
   if (runtime_error) {
     html.errors += `

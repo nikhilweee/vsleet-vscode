@@ -9,6 +9,7 @@ export interface Snippet {
 
 export interface Question {
   frontendQuestionId: string;
+  backendQuestionId: string;
   acRate: number;
   titleSlug: string;
   paidOnly: boolean;

@@ -12,7 +12,7 @@ export class ProblemItem implements vscode.QuickPickItem {
   title: string;
 
   constructor(question: Question) {
-    this.id = question.frontendQuestionId.padStart(4, "0");
+    this.id = question.backendQuestionId.padStart(4, "0");
     this.slug = question.titleSlug;
     this.description = "";
     this.title = `[${this.id}] ${question.title}`;

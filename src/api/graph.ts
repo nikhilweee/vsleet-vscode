@@ -36,6 +36,7 @@ export class LTGraphAPI {
           questions: data {
             acRate
             difficulty
+            backendQuestionId: questionId
             frontendQuestionId: questionFrontendId
             paidOnly: isPaidOnly
             status

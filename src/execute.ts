@@ -195,7 +195,14 @@ function parseExecutionResults(
   const status_msg = pop(results, "status_msg");
 
   if (num_total) {
-    parsed.heading = `<h2>${status_msg}: ${num_correct} / ${num_total}</h2>`;
+    let emoji = "🔴";
+    if (num_correct === num_total) {
+      emoji = "🟢";
+    } else if (typeof num_correct === "number" && num_correct > 0) {
+      emoji = "🟡";
+    }
+    parsed.heading = `
+    <h2>${command} ${status_msg}: ${num_correct} / ${num_total} ${emoji}</h2>`;
   } else {
     parsed.heading = `<h2>${status_msg}</h2>`;
   }

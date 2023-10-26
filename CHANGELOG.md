@@ -20,3 +20,4 @@ to structure this file.
 - Update template headers to include vsleet version.
 - Test markers are not required for submit solution.
 - Execution results are now reflected in source code.
+- Execution results are also restored while updating template.

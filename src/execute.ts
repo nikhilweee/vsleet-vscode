@@ -72,7 +72,7 @@ async function checkExecution(
   );
 }
 
-export function parseEditor(requireTests = true) {
+export function parseEditor(parseTests = true) {
   if (!vscode.window.activeTextEditor) {
     vscode.window.showErrorMessage(
       `Cannot find active editor.
@@ -121,7 +121,7 @@ export function parseEditor(requireTests = true) {
   };
 
   // Parse tests
-  if (requireTests) {
+  if (parseTests) {
     const reTests = RegExp("# vsleet:tests:start(.*)# vsleet:tests:end", "gs");
     const matchTests = reTests.exec(text);
     if (!matchTests || matchTests.length < 2) {

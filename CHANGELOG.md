@@ -17,4 +17,5 @@ to structure this file.
 - Read test cases from source file.
 - Show test inputs while running solution.
 - Add command to update solution template.
-- Update template headers.
+- Update template headers to include vsleet version.
+- Test markers are not required for submit solution.

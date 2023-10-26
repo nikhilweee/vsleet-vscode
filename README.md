@@ -26,6 +26,7 @@ https://marketplace.visualstudio.com/items?itemName=nikhilweee.vsleet
 - `vsleet: Run Solution`: Run solution on LeetCode
 - `vsleet: Submit Solution`: Submit solution to LeetCode
 - `vsleet: Paste Cookie`: Paste cookie to authenticate
+- `vsleet: Update Template`: Update solution template
 
 ## Keyboard Shortcuts
 

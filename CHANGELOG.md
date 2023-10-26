@@ -17,3 +17,4 @@ to structure this file.
 - Read test cases from source file.
 - Show test inputs while running solution.
 - Add command to update solution template.
+- Update template headers.

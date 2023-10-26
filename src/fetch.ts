@@ -203,21 +203,7 @@ function generateCode(
   const extension = vscode.extensions.getExtension("nikhilweee.vsleet");
   const version = extension?.packageJSON.version;
 
-  // Format editor snippet
-  let code = `# ${activeItem.id}-${activeItem.slug}.py\n`;
-  code += `# https://leetcode.com/problems/${activeItem.slug}/\n\n`;
-  code += `# This file was auto-generated using the vsleet extension version ${version}\n`;
-  code += `# https://marketplace.visualstudio.com/items?itemName=nikhilweee.vsleet\n\n`;
-  code += `# Write your solution between vsleet:code:start and vsleet:code:end\n\n`;
-  code += "from typing import List, Dict\n\n";
-  code += "# vsleet:code:start\n\n";
-  code += `${snippet}`;
-  // pass is already indented
-  code += "pass\n\n";
-  code += "# vsleet:code:end\n\n";
-  code += "# vsleet:tests:start\n\n";
-
-  // Format test cases
+  // Format tests
   let testCases: Object[] = [];
   tests.forEach((test) => {
     let testCase: Object = {};
@@ -229,15 +215,44 @@ function generateCode(
   });
   const testString = JSON.stringify(testCases, null, 2);
 
-  // Format main block
+  // Header
+  let code = `# ${activeItem.id}-${activeItem.slug}.py`;
+  let header = `
+  
+  #   https://leetcode.com/problems/${activeItem.slug}/
+  #   This file was auto-generated using the vsleet extension version ${version}
+  #
+  #   https://marketplace.visualstudio.com/items?itemName=nikhilweee.vsleet
+  #   Write your solution between vsleet:code:start and vsleet:code:end
+
+  from typing import List, Dict
+
+  # vsleet:code:start
+
+  ${snippet}pass
+
+  # vsleet:code:end
+  
+  `;
+  code += header.replace(/\n  /g, "\n");
+
+  // Tests
+  code += "# vsleet:tests:start\n\n";
   code += `testcases = ${testString}\n\n`;
-  code += `# vsleet:tests:end\n\n`;
-  code += `if __name__ == "__main__":\n`;
-  code += `  solution = Solution()\n`;
-  code += `  for testcase in testcases:\n`;
-  code += `    print("testcase:", testcase)\n`;
-  code += `    result = solution.${meta.name}(**testcase)\n`;
-  code += `    print("result:", result)\n`;
+  code += "# vsleet:tests:end";
+
+  // Footer
+  let footer = `
+  
+  if __name__ == "__main__":
+    solution = Solution()
+    for testcase in testcases:
+      print("testcase:", testcase)
+      result = solution.${meta.name}(**testcase)
+      print("result:", result)
+  
+  `;
+  code += footer.replace(/\n  /g, "\n");
 
   return code;
 }

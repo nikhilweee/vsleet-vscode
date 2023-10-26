@@ -85,8 +85,8 @@ export function parseEditor(requireTests = true) {
   const text = vscode.window.activeTextEditor.document.getText();
 
   const reName = RegExp("# (\\d*)-([\\w-]*).py");
-  const resultsName = reName.exec(text);
-  if (!resultsName || resultsName.length < 3) {
+  const matchName = reName.exec(text);
+  if (!matchName || matchName.length < 3) {
     vscode.window.showErrorMessage(
       `Cannot parse problem details.
       Please include a comment line: # {id}-{slug}.py
@@ -94,12 +94,12 @@ export function parseEditor(requireTests = true) {
     );
     throw new Error("Cannot parse problem details.");
   }
-  const slug = resultsName[2];
-  const id = parseInt(resultsName[1]);
+  const slug = matchName[2];
+  const id = parseInt(matchName[1]);
 
   const reCode = RegExp("# vsleet:code:start(.*)# vsleet:code:end", "gs");
-  const resultsCode = reCode.exec(text);
-  if (!resultsCode || resultsCode.length < 2) {
+  const matchCode = reCode.exec(text);
+  if (!matchCode || matchCode.length < 2) {
     vscode.window.showErrorMessage(
       `Cannot find code markers.
       Please write your solution between
@@ -107,7 +107,7 @@ export function parseEditor(requireTests = true) {
     );
     throw new Error("Cannot find code markers.");
   }
-  const code = resultsCode[1];
+  const code = matchCode[1];
 
   const parsed: ParsedEditor = {
     id: id,
@@ -115,12 +115,13 @@ export function parseEditor(requireTests = true) {
     code: code,
     testStr: "",
     testJSON: [],
+    results: "",
   };
 
   if (requireTests) {
     const reTests = RegExp("# vsleet:tests:start(.*)# vsleet:tests:end", "gs");
-    const resultsTests = reTests.exec(text);
-    if (!resultsTests || resultsTests.length < 2) {
+    const matchTests = reTests.exec(text);
+    if (!matchTests || matchTests.length < 2) {
       vscode.window.showErrorMessage(
         `Cannot find test markers.
         Please write your solution between
@@ -129,7 +130,7 @@ export function parseEditor(requireTests = true) {
       throw new Error("Cannot find test markers.");
     }
 
-    const testCases = resultsTests[1];
+    const testCases = matchTests[1];
     const reTestCases = RegExp("\\[(.*)\\]", "gs");
     const resultsTestCases = reTestCases.exec(testCases);
     if (!resultsTestCases || resultsTestCases.length < 2) {
@@ -149,6 +150,15 @@ export function parseEditor(requireTests = true) {
 
     parsed.testStr = testStr;
     parsed.testJSON = testJSON;
+  }
+
+  const reResults = RegExp(
+    "# vsleet:results:start(.*)# vsleet:results:end",
+    "gs"
+  );
+  const matchResults = reResults.exec(text);
+  if (matchResults && matchResults.length === 2) {
+    parsed.results = matchResults[1];
   }
 
   return parsed;

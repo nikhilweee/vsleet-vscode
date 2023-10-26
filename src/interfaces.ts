@@ -28,4 +28,5 @@ export interface ParsedEditor {
   code: string;
   testStr: string;
   testJSON: Object[];
+  results: string;
 }

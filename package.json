@@ -8,7 +8,7 @@
   },
   "icon": "media/vsleet.png",
   "description": "Submit LeetCode problems directly from VSCode",
-  "version": "0.0.21",
+  "version": "0.0.22",
   "engines": {
     "vscode": "^1.83.0"
   },

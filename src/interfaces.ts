@@ -17,7 +17,15 @@ export interface Question {
   status: string;
 }
 
-export interface Meta {
+export interface QuestionMeta {
   params: Object[];
   name: string;
+}
+
+export interface ParsedEditor {
+  id: number;
+  slug: string;
+  code: string;
+  testStr: string;
+  testJSON: Object[];
 }

@@ -2,7 +2,7 @@
 import * as vscode from "vscode";
 import * as JSON5 from "json5";
 import { LTJudgeAPI } from "./api/judge";
-import { Object } from "./interfaces";
+import { Object, ParsedEditor } from "./interfaces";
 
 let ltJudge: LTJudgeAPI;
 
@@ -28,7 +28,7 @@ export async function handleRun(context: vscode.ExtensionContext) {
 export async function handleSubmit(context: vscode.ExtensionContext) {
   ltJudge = await LTJudgeAPI.getInstance(context);
 
-  const parsed = parseEditor();
+  const parsed = parseEditor(false);
 
   let res = await ltJudge.submitSolution(parsed.id, parsed.slug, parsed.code);
   const checkId = res.submission_id;
@@ -68,7 +68,7 @@ async function checkExecution(
   );
 }
 
-export function parseEditor() {
+export function parseEditor(requireTests = true) {
   if (!vscode.window.activeTextEditor) {
     vscode.window.showErrorMessage(
       `Cannot find active editor.
@@ -105,42 +105,49 @@ export function parseEditor() {
   }
   const code = resultsCode[1];
 
-  const reTests = RegExp("# vsleet:tests:start(.*)# vsleet:tests:end", "gs");
-  const resultsTests = reTests.exec(text);
-  if (!resultsTests || resultsTests.length < 2) {
-    vscode.window.showErrorMessage(
-      `Cannot find test markers.
-      Please write your solution between
-      # vsleet:tests:start and # vsleet:tests:end tags.`
-    );
-    throw new Error("Cannot find test markers.");
-  }
-
-  const testCases = resultsTests[1];
-  const reTestCases = RegExp("\\[(.*)\\]", "gs");
-  const resultsTestCases = reTestCases.exec(testCases);
-  if (!resultsTestCases || resultsTestCases.length < 2) {
-    vscode.window.showErrorMessage(`Cannot parse test cases.`);
-    throw new Error("Cannot parse test cases.");
-  }
-
-  const testJSON = JSON5.parse(resultsTestCases[0]);
-  let testStr = "";
-  testJSON.forEach((testcase: Object) => {
-    for (let value of Object.values(testcase)) {
-      testStr += JSON.stringify(value);
-      testStr += "\n";
-    }
-  });
-  testStr = testStr.trim();
-
-  return {
+  const parsed: ParsedEditor = {
     id: id,
     slug: slug,
     code: code,
-    testStr: testStr,
-    testJSON: testJSON,
+    testStr: "",
+    testJSON: [],
   };
+
+  if (requireTests) {
+    const reTests = RegExp("# vsleet:tests:start(.*)# vsleet:tests:end", "gs");
+    const resultsTests = reTests.exec(text);
+    if (!resultsTests || resultsTests.length < 2) {
+      vscode.window.showErrorMessage(
+        `Cannot find test markers.
+        Please write your solution between
+        # vsleet:tests:start and # vsleet:tests:end tags.`
+      );
+      throw new Error("Cannot find test markers.");
+    }
+
+    const testCases = resultsTests[1];
+    const reTestCases = RegExp("\\[(.*)\\]", "gs");
+    const resultsTestCases = reTestCases.exec(testCases);
+    if (!resultsTestCases || resultsTestCases.length < 2) {
+      vscode.window.showErrorMessage(`Cannot parse test cases.`);
+      throw new Error("Cannot parse test cases.");
+    }
+
+    const testJSON = JSON5.parse(resultsTestCases[0]);
+    let testStr = "";
+    testJSON.forEach((testcase: Object) => {
+      for (let value of Object.values(testcase)) {
+        testStr += JSON.stringify(value);
+        testStr += "\n";
+      }
+    });
+    testStr = testStr.trim();
+
+    parsed.testStr = testStr;
+    parsed.testJSON = testJSON;
+  }
+
+  return parsed;
 }
 
 function parseExecutionResults(

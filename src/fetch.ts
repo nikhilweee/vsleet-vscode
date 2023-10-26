@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import * as vscode from "vscode";
 import { LTGraphAPI } from "./api/graph";
-import { Object, Question, Snippet, Meta } from "./interfaces";
+import { Object, Question, Snippet, QuestionMeta } from "./interfaces";
 
 export class ProblemItem implements vscode.QuickPickItem {
   id: string;
@@ -198,7 +198,7 @@ function generateCode(
   activeItem: ProblemItem,
   snippet: string,
   tests: string[],
-  meta: Meta
+  meta: QuestionMeta
 ) {
   const extension = vscode.extensions.getExtension("nikhilweee.vsleet");
   const version = extension?.packageJSON.version;

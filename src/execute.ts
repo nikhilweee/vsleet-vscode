@@ -278,7 +278,7 @@ function parseResults(results: Object, command: string, testJSON: Object[]) {
 
   html.details = `
   <details>
-  <summary><strong>Other Information</strong></summary>
+  <summary><strong>Additional Information</strong></summary>
   <pre>${JSON.stringify(results, null, 2)}</pre>
   </details>
   </body>

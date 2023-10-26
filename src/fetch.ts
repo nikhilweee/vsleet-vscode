@@ -253,7 +253,11 @@ function generateCode(
       print("testcase:", testcase)
       result = solution.${meta.name}(**testcase)
       print("result:", result)
-  
+
+  # vsleet:results:start
+  # Run your solution for memory and runtime status, or
+  # Submit your solution for memory and runtime percentiles
+  # vsleet:results:end
   `;
   code += footer.replace(/\n  /g, "\n");
 

@@ -219,11 +219,14 @@ function generateCode(
   let code = `# ${activeItem.id}-${activeItem.slug}.py`;
   let header = `
   
+  #   View this problem directly from your browser:
   #   https://leetcode.com/problems/${activeItem.slug}/
-  #   This file was auto-generated using the vsleet extension version ${version}
   #
+  #   This file was auto-generated using the vsleet extension version ${version}
   #   https://marketplace.visualstudio.com/items?itemName=nikhilweee.vsleet
+  #
   #   Write your solution between vsleet:code:start and vsleet:code:end
+  #   Write test cases between vsleet:tests:start and vsleet:tests:end
 
   from typing import List, Dict
 

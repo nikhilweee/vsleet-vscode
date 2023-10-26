@@ -5,7 +5,7 @@ import { LTGraphAPI } from "./api/graph";
 
 export async function handleUpdate(context: vscode.ExtensionContext) {
   const ltGraph = await LTGraphAPI.getInstance(context);
-  const parsed = parseEditor();
+  const parsed = parseEditor(false);
   const question = {
     frontendQuestionId: parsed.id.toString(),
     titleSlug: parsed.slug,

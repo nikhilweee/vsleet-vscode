@@ -84,6 +84,7 @@ export function parseEditor(requireTests = true) {
 
   const text = vscode.window.activeTextEditor.document.getText();
 
+  // Parse problem details
   const reName = RegExp("# (\\d*)-([\\w-]*).py");
   const matchName = reName.exec(text);
   if (!matchName || matchName.length < 3) {
@@ -97,6 +98,7 @@ export function parseEditor(requireTests = true) {
   const slug = matchName[2];
   const id = parseInt(matchName[1]);
 
+  // Parse solution
   const reCode = RegExp("# vsleet:code:start(.*)# vsleet:code:end", "gs");
   const matchCode = reCode.exec(text);
   if (!matchCode || matchCode.length < 2) {
@@ -118,13 +120,14 @@ export function parseEditor(requireTests = true) {
     results: "",
   };
 
+  // Parse tests
   if (requireTests) {
     const reTests = RegExp("# vsleet:tests:start(.*)# vsleet:tests:end", "gs");
     const matchTests = reTests.exec(text);
     if (!matchTests || matchTests.length < 2) {
       vscode.window.showErrorMessage(
         `Cannot find test markers.
-        Please write your solution between
+        Please write your test cases between
         # vsleet:tests:start and # vsleet:tests:end tags.`
       );
       throw new Error("Cannot find test markers.");
@@ -152,6 +155,7 @@ export function parseEditor(requireTests = true) {
     parsed.testJSON = testJSON;
   }
 
+  // Parse results
   const reResults = RegExp(
     "# vsleet:results:start(.*)# vsleet:results:end",
     "gs"

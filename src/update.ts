@@ -50,10 +50,10 @@ export async function handleUpdate(context: vscode.ExtensionContext) {
     editBuilder.replace(range, newCode);
   });
 
-  // For now, just restore previous solution
+  // Restore previous solution
   await vscode.window.activeTextEditor.edit((editBuilder) => {
     const regex = RegExp("# vsleet:code:start(.*)# vsleet:code:end", "gds");
-    const match = regex.exec(newCode);
+    const match = regex.exec(document.getText());
     if (!match || match.length < 2 || !match.indices) {
       throw new Error("Cannot find code markers.");
     }
@@ -62,6 +62,24 @@ export async function handleUpdate(context: vscode.ExtensionContext) {
     const range = new vscode.Range(start, end);
     editBuilder.replace(range, parsed.code);
   });
+
+  // Restore execution results
+  if (parsed.results) {
+    await vscode.window.activeTextEditor.edit((editBuilder) => {
+      const regex = RegExp(
+        "# vsleet:results:start(.*)# vsleet:results:end",
+        "gds"
+      );
+      const match = regex.exec(document.getText());
+      if (!match || match.length < 2 || !match.indices) {
+        throw new Error("Cannot find result markers.");
+      }
+      const start = document.positionAt(match.indices[1][0]);
+      const end = document.positionAt(match.indices[1][1]);
+      const range = new vscode.Range(start, end);
+      editBuilder.replace(range, parsed.results);
+    });
+  }
 
   await vscode.commands.executeCommand("editor.action.formatDocument");
 }

@@ -11,24 +11,23 @@ import {
 import { getCssUri } from "./utils";
 
 class ProblemItem implements vscode.QuickPickItem {
-  id: string;
-  fragment: string;
+  // Inherited attributes
   description: string;
   label: string;
   detail: string;
+  // Custom attributes
+  id: string;
   slug: string;
   title: string;
 
   constructor(question: Question) {
-    const backendId = question.backendQuestionId.padStart(4, "0");
-    const frontendId = question.frontendQuestionId.padStart(4, "0");
-    this.id = backendId;
-    this.fragment = `${backendId}/${frontendId}`;
-    this.slug = question.titleSlug;
     this.description = "";
+    // Set label
+    this.id = question.frontendQuestionId.padStart(4, "0");
+    this.slug = question.titleSlug;
     this.title = `[${this.id}] ${question.title}`;
     this.label = this.title;
-
+    // Set detail
     const price = question.paidOnly ? "Premium" : "Free";
     const acceptance = question.acRate.toFixed(3);
     this.detail = `Tier: ${price} | Difficulty: ${question.difficulty} | AC: ${acceptance}%`;

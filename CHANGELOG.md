@@ -21,7 +21,5 @@ to structure this file.
 - Test markers are not required for submit solution.
 - Execution results are now reflected in source code.
 - Execution results are also restored while updating template.
-- Switch to using backend question ID.
 - Use markdown CSS from the official extension.
-- Switch back to using frontend question ID in filename.
 - Specify backend question ID in problem URL fragment.

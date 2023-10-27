@@ -22,3 +22,4 @@ to structure this file.
 - Execution results are now reflected in source code.
 - Execution results are also restored while updating template.
 - Switch to using backend question ID.
+- Use markdown CSS from the official extension.

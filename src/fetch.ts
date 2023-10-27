@@ -4,7 +4,7 @@ import { LTGraphAPI } from "./api/graph";
 import { Object, Question, Snippet, QuestionMeta } from "./interfaces";
 import { getCssUri } from "./utils";
 
-export class ProblemItem implements vscode.QuickPickItem {
+class ProblemItem implements vscode.QuickPickItem {
   id: string;
   frontendId: string;
   backendId: string;

@@ -111,8 +111,12 @@ async function handleAccept(activeItem: ProblemItem, ltGraph: LTGraphAPI) {
   const panel = vscode.window.createWebviewPanel(
     "leetcode",
     activeItem.title,
-    vscode.ViewColumn.Beside,
-    { enableScripts: true, localResourceRoots: localResourceRoots }
+    { preserveFocus: true, viewColumn: vscode.ViewColumn.Beside },
+    {
+      enableScripts: true,
+      enableForms: false,
+      localResourceRoots: localResourceRoots,
+    }
   );
   const cssSrc = panel.webview.asWebviewUri(cssUri).toString();
   panel.webview.html = generateHTML(

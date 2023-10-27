@@ -5,6 +5,8 @@ import { Object, Question, Snippet, QuestionMeta } from "./interfaces";
 
 export class ProblemItem implements vscode.QuickPickItem {
   id: string;
+  frontendId: string;
+  backendId: string;
   description: string;
   label: string;
   detail: string;
@@ -12,7 +14,9 @@ export class ProblemItem implements vscode.QuickPickItem {
   title: string;
 
   constructor(question: Question) {
-    this.id = question.backendQuestionId.padStart(4, "0");
+    this.backendId = question.backendQuestionId.padStart(4, "0");
+    this.frontendId = question.frontendQuestionId.padStart(4, "0");
+    this.id = this.backendId;
     this.slug = question.titleSlug;
     this.description = "";
     this.title = `[${this.id}] ${question.title}`;
@@ -80,7 +84,7 @@ async function handleChange(
 async function handleAccept(activeItem: ProblemItem, ltGraph: LTGraphAPI) {
   let res = null;
 
-  const fileContents = await getCode(activeItem, ltGraph);
+  const fileContents = await getCode(activeItem.id, activeItem.slug, ltGraph);
 
   // Open existing or create new file
   // const document = await getTextDocument(fileName, fileContents);
@@ -103,19 +107,22 @@ async function handleAccept(activeItem: ProblemItem, ltGraph: LTGraphAPI) {
     vscode.ViewColumn.Beside,
     { enableScripts: true }
   );
-  panel.webview.html = generateHTML(activeItem, res.data.question.content);
+  panel.webview.html = generateHTML(
+    activeItem.title,
+    res.data.question.content
+  );
 }
 
-export async function getCode(activeItem: ProblemItem, ltGraph: LTGraphAPI) {
+export async function getCode(id: string, slug: string, ltGraph: LTGraphAPI) {
   let res = null;
 
   // Fetch test cases
-  res = await ltGraph.fetchTests(activeItem.slug);
+  res = await ltGraph.fetchTests(slug);
   const tests = res.data.question.exampleTestcaseList;
   const meta = JSON.parse(res.data.question.metaData);
 
   // Fetch editor contents
-  res = await ltGraph.fetchEditor(activeItem.slug);
+  res = await ltGraph.fetchEditor(slug);
   let snippets: Snippet[] = res.data.question.codeSnippets;
   if (!snippets) {
     const message = "Code snippets not found.";
@@ -132,11 +139,11 @@ export async function getCode(activeItem: ProblemItem, ltGraph: LTGraphAPI) {
     snippet = { langSlug: "python3", code: "" };
   }
 
-  const fileContents = generateCode(activeItem, snippet.code, tests, meta);
+  const fileContents = generateCode(id, slug, snippet.code, tests, meta);
   return fileContents;
 }
 
-function generateHTML(activeItem: ProblemItem, content: string) {
+function generateHTML(title: string, content: string) {
   const html = `
   <html>
   <head>
@@ -153,7 +160,7 @@ function generateHTML(activeItem: ProblemItem, content: string) {
   </head>
   <body>
   <header>
-    <h3>${activeItem.title}</h3>
+    <h3>${title}</h3>
     <span id="stopwatch">00:00:00</span>
   </header>
   <main>${content}</main>
@@ -195,7 +202,8 @@ function generateHTML(activeItem: ProblemItem, content: string) {
 }
 
 function generateCode(
-  activeItem: ProblemItem,
+  id: string,
+  slug: string,
   snippet: string,
   tests: string[],
   meta: QuestionMeta
@@ -216,11 +224,11 @@ function generateCode(
   const testString = JSON.stringify(testCases, null, 2);
 
   // Header
-  let code = `# ${activeItem.id}-${activeItem.slug}.py`;
+  let code = `# ${id}-${slug}.py`;
   let header = `
 
   # View this problem directly from your browser
-  # https://leetcode.com/problems/${activeItem.slug}/
+  # https://leetcode.com/problems/${slug}/#${id}
 
   # This file was generated using the vsleet extension version ${version}
   # https://marketplace.visualstudio.com/items?itemName=nikhilweee.vsleet

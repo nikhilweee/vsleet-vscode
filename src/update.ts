@@ -1,22 +1,11 @@
 import * as vscode from "vscode";
 import { parseEditor } from "./execute";
-import { getCode, ProblemItem } from "./fetch";
+import { getCode } from "./fetch";
 import { LTGraphAPI } from "./api/graph";
 
 export async function handleUpdate(context: vscode.ExtensionContext) {
   const ltGraph = await LTGraphAPI.getInstance(context);
   const parsed = parseEditor(false);
-  const question = {
-    frontendQuestionId: "",
-    backendQuestionId: parsed.id.toString(),
-    titleSlug: parsed.slug,
-    acRate: 50.0,
-    paidOnly: false,
-    title: "",
-    difficulty: "",
-    status: "",
-  };
-  const problemItem = new ProblemItem(question);
 
   const newCode = await vscode.window.withProgress(
     {
@@ -25,7 +14,7 @@ export async function handleUpdate(context: vscode.ExtensionContext) {
       cancellable: true,
     },
     async (progress, token) => {
-      return getCode(problemItem, ltGraph)
+      return getCode(parsed.id.toString(), parsed.slug, ltGraph)
         .then((code) => code)
         .catch((error) => {
           vscode.window.showErrorMessage(`vsleet: Error updating template.`);

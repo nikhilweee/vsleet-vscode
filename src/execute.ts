@@ -87,35 +87,44 @@ export function parseEditor(parseTests = true) {
 
   const text = vscode.window.activeTextEditor.document.getText();
 
+  let slug = "";
+  let id = 0;
+  let fragment = "";
+
   // Parse problem details
   const reName = RegExp("# (\\d*)-([\\w-]*).py");
   const matchName = reName.exec(text);
-  if (!matchName || matchName.length < 3) {
-    vscode.window.showErrorMessage(
-      `Cannot parse problem details.
-      Please try running vsleet: Load Problem again.`
-    );
-    throw new Error("Cannot parse problem details.");
+  if (matchName && matchName.length >= 3) {
+    slug = matchName[2];
+    id = parseInt(matchName[1]);
+    fragment = matchName[1];
   }
-  let slug = matchName[2];
-  let id = parseInt(matchName[1]);
-  let fragment = matchName[1];
 
   // Parse problem fragment
   const reFragment = RegExp(
-    "# https://leetcode.com/problems/([\\w-]*)#([\\d]4)/([\\d]4)"
+    "# https:\\/\\/leetcode\\.com\\/problems\\" +
+      "/([\\w-]*)#([\\d]{4})\\/([\\d]{4})"
   );
   const matchFragment = reFragment.exec(text);
   if (!matchFragment || matchFragment.length < 4) {
     vscode.window.showWarningMessage(
       `Cannot parse problem fragment.
-      Please try running vsleet: Load Problem again.`
+      Please run vsleet: Update Template
+      to update the solution template.`
     );
-    console.warn("Cannot parse problem fragment.");
   } else {
     slug = slug || matchFragment[1];
     id = id || parseInt(matchFragment[2]);
     fragment = `${matchFragment[2]}/${matchFragment[3]}`;
+  }
+
+  if (!id) {
+    vscode.window.showErrorMessage(
+      `Cannot parse problem ID.
+      Please run vsleet: Load Problem
+      to load a fresh solution template.`
+    );
+    throw new Error("Cannot parse problem ID.");
   }
 
   // Parse solution

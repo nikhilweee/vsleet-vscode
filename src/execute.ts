@@ -231,10 +231,10 @@ function parseResults(
       const test = JSON.stringify(testJSON[i]);
       html.tests += `
       <pre>
-      Input:   : ${test}
-      Expected : ${expected}
-      Answer   : ${answer}
-      Correct  : ${compare}
+      <strong>Input</strong>:   : ${test}
+      <strong>Expected</strong> : ${expected}
+      <strong>Answer</strong>   : ${answer}
+      <strong>Correct</strong>  : ${compare}
       </pre>
       `.replace(/\n      /g, "\n");
     });
@@ -340,7 +340,7 @@ function parseResults(
 
     let inputs_formatted = "";
     inputs.forEach((input, index) => {
-      inputs_formatted += `Input ${index + 1}: ${input}\n`;
+      inputs_formatted += `<strong>Input ${index + 1}</strong>: ${input}\n`;
     });
 
     html.errors += `

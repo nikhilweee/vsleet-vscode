@@ -18,6 +18,12 @@ export interface Question {
   status: string;
 }
 
+export interface QuestionDisplay {
+  id: string;
+  slug: string;
+  fragment: string;
+}
+
 export interface QuestionMeta {
   params: Object[];
   name: string;

@@ -1,7 +1,13 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import * as vscode from "vscode";
 import { LTGraphAPI } from "./api/graph";
-import { Object, Question, Snippet, QuestionMeta } from "./interfaces";
+import {
+  Object,
+  Question,
+  Snippet,
+  QuestionMeta,
+  QuestionDisplay,
+} from "./interfaces";
 import { getCssUri } from "./utils";
 
 class ProblemItem implements vscode.QuickPickItem {
@@ -85,7 +91,12 @@ async function handleChange(
 async function handleAccept(activeItem: ProblemItem, ltGraph: LTGraphAPI) {
   let res = null;
 
-  const fileContents = await getCode(activeItem.id, activeItem.slug, ltGraph);
+  const question: QuestionDisplay = {
+    id: activeItem.id,
+    slug: activeItem.slug,
+    fragment: activeItem.id,
+  };
+  const fileContents = await getCode(question, ltGraph);
 
   // Open existing or create new file
   // const document = await getTextDocument(fileName, fileContents);
@@ -117,16 +128,16 @@ async function handleAccept(activeItem: ProblemItem, ltGraph: LTGraphAPI) {
   );
 }
 
-export async function getCode(id: string, slug: string, ltGraph: LTGraphAPI) {
+export async function getCode(question: QuestionDisplay, ltGraph: LTGraphAPI) {
   let res = null;
 
   // Fetch test cases
-  res = await ltGraph.fetchTests(slug);
+  res = await ltGraph.fetchTests(question.slug);
   const tests = res.data.question.exampleTestcaseList;
   const meta = JSON.parse(res.data.question.metaData);
 
   // Fetch editor contents
-  res = await ltGraph.fetchEditor(slug);
+  res = await ltGraph.fetchEditor(question.slug);
   let snippets: Snippet[] = res.data.question.codeSnippets;
   if (!snippets) {
     const message = "Code snippets not found.";
@@ -143,7 +154,7 @@ export async function getCode(id: string, slug: string, ltGraph: LTGraphAPI) {
     snippet = { langSlug: "python3", code: "" };
   }
 
-  const fileContents = generateCode(id, slug, snippet.code, tests, meta);
+  const fileContents = generateCode(question, snippet.code, tests, meta);
   return fileContents;
 }
 
@@ -207,8 +218,7 @@ function generateHTML(title: string, content: string, cssSrc: string) {
 }
 
 function generateCode(
-  id: string,
-  slug: string,
+  question: QuestionDisplay,
   snippet: string,
   tests: string[],
   meta: QuestionMeta
@@ -229,11 +239,11 @@ function generateCode(
   const testString = JSON.stringify(testCases, null, 2);
 
   // Header
-  let code = `# ${id}-${slug}.py`;
+  let code = `# ${question.id}-${question.slug}.py`;
   let header = `
 
   # View this problem directly from your browser
-  # https://leetcode.com/problems/${slug}/#${id}
+  # https://leetcode.com/problems/${question.slug}/#${question.fragment}
 
   # This file was generated using the vsleet extension version ${version}
   # https://marketplace.visualstudio.com/items?itemName=nikhilweee.vsleet

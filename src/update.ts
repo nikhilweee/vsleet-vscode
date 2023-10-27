@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import { parseEditor } from "./execute";
 import { getCode } from "./fetch";
 import { LTGraphAPI } from "./api/graph";
+import { QuestionDisplay } from "./interfaces";
 
 export async function handleUpdate(context: vscode.ExtensionContext) {
   const ltGraph = await LTGraphAPI.getInstance(context);
@@ -14,7 +15,12 @@ export async function handleUpdate(context: vscode.ExtensionContext) {
       cancellable: true,
     },
     async (progress, token) => {
-      return getCode(parsed.id.toString(), parsed.slug, ltGraph)
+      const question: QuestionDisplay = {
+        id: parsed.id.toString(),
+        slug: parsed.slug,
+        fragment: parsed.id.toString(),
+      };
+      return getCode(question, ltGraph)
         .then((code) => code)
         .catch((error) => {
           vscode.window.showErrorMessage(`vsleet: Error updating template.`);

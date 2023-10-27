@@ -100,8 +100,8 @@ export class LTGraphAPI {
     const query = `
       query consolePanelConfig($titleSlug: String!) {
         question(titleSlug: $titleSlug) {
-          questionId
-          questionFrontendId
+          backendQuestionId: questionId
+          frontendQuestionId: questionFrontendId
           questionTitle
           enableDebugger
           enableRunCode

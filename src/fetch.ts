@@ -91,12 +91,7 @@ async function handleChange(
 async function handleAccept(activeItem: ProblemItem, ltGraph: LTGraphAPI) {
   let res = null;
 
-  const question: QuestionDisplay = {
-    id: activeItem.id,
-    slug: activeItem.slug,
-    fragment: activeItem.fragment,
-  };
-  const fileContents = await getCode(question, ltGraph);
+  const fileContents = await getCode(activeItem.slug, ltGraph);
 
   // Open existing or create new file
   // const document = await getTextDocument(fileName, fileContents);
@@ -128,17 +123,23 @@ async function handleAccept(activeItem: ProblemItem, ltGraph: LTGraphAPI) {
   );
 }
 
-export async function getCode(question: QuestionDisplay, ltGraph: LTGraphAPI) {
+export async function getCode(slug: string, ltGraph: LTGraphAPI) {
   let res = null;
 
   // Fetch test cases
-  res = await ltGraph.fetchTests(question.slug);
-  const tests = res.data.question.exampleTestcaseList;
-  const meta = JSON.parse(res.data.question.metaData);
+  res = await ltGraph.fetchTests(slug);
+  const q = res.data.question;
+  const tests = q.exampleTestcaseList;
+  const meta = JSON.parse(q.metaData);
+  const question: QuestionDisplay = {
+    id: q.backendQuestionId,
+    slug: slug,
+    fragment: `${q.backendQuestionId}/${q.frontendQuestionId}`,
+  };
 
   // Fetch editor contents
-  res = await ltGraph.fetchEditor(question.slug);
-  let snippets: Snippet[] = res.data.question.codeSnippets;
+  res = await ltGraph.fetchEditor(slug);
+  let snippets: Snippet[] = q.codeSnippets;
   if (!snippets) {
     const message = "Code snippets not found.";
     vscode.window.showErrorMessage(message);

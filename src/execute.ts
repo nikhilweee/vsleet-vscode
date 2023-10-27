@@ -80,8 +80,7 @@ export function parseEditor(parseTests = true) {
   if (!vscode.window.activeTextEditor) {
     vscode.window.showErrorMessage(
       `Cannot find active editor.
-      Please run this command from 
-      an active editor window.`
+      Please run this command from an active editor.`
     );
     throw new Error("No active editor found.");
   }
@@ -94,13 +93,30 @@ export function parseEditor(parseTests = true) {
   if (!matchName || matchName.length < 3) {
     vscode.window.showErrorMessage(
       `Cannot parse problem details.
-      Please include a comment line: # {id}-{slug}.py
-      (for example: # 0001-two-sum.py).`
+      Please try running vsleet: Load Problem again.`
     );
     throw new Error("Cannot parse problem details.");
   }
-  const slug = matchName[2];
-  const id = parseInt(matchName[1]);
+  let slug = matchName[2];
+  let id = parseInt(matchName[1]);
+  let fragment = matchName[1];
+
+  // Parse problem fragment
+  const reFragment = RegExp(
+    "# https://leetcode.com/problems/([\\w-]*)#([\\d]4)/([\\d]4)"
+  );
+  const matchFragment = reFragment.exec(text);
+  if (!matchFragment || matchFragment.length < 4) {
+    vscode.window.showWarningMessage(
+      `Cannot parse problem fragment.
+      Please try running vsleet: Load Problem again.`
+    );
+    console.warn("Cannot parse problem fragment.");
+  } else {
+    slug = slug || matchFragment[1];
+    id = id || parseInt(matchFragment[2]);
+    fragment = `${matchFragment[2]}/${matchFragment[3]}`;
+  }
 
   // Parse solution
   const reCode = RegExp("# vsleet:code:start(.*)# vsleet:code:end", "gs");
@@ -118,6 +134,7 @@ export function parseEditor(parseTests = true) {
   const parsed: ParsedEditor = {
     id: id,
     slug: slug,
+    fragment: fragment,
     code: code,
     tests: "",
     testJSON: [],

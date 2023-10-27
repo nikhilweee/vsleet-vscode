@@ -33,6 +33,7 @@ export interface ParsedEditor {
   id: number;
   slug: string;
   code: string;
+  fragment: string;
   tests: string;
   testJSON: Object[];
   results: string;

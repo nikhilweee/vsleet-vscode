@@ -139,7 +139,7 @@ export async function getCode(slug: string, ltGraph: LTGraphAPI) {
 
   // Fetch editor contents
   res = await ltGraph.fetchEditor(slug);
-  let snippets: Snippet[] = q.codeSnippets;
+  let snippets: Snippet[] = res.data.question.codeSnippets;
   if (!snippets) {
     const message = "Code snippets not found.";
     vscode.window.showErrorMessage(message);

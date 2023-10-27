@@ -93,7 +93,7 @@ export function parseEditor(parseTests = true) {
 
   // Parse problem fragment
   const reFragment = RegExp(
-    "# https:\\/\\/leetcode\\.com\\/problems\\/([\\w-]*)#([\\d]{4})"
+    "# https:\\/\\/leetcode\\.com\\/problems\\/([\\w-]*)#([\\d]+)"
   );
   const matchFragment = reFragment.exec(text);
   if (!matchFragment || matchFragment.length < 3) {

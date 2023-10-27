@@ -214,27 +214,35 @@ function parseResults(
   const answers = pop(results, "code_answer");
   const truths = pop(results, "expected_code_answer");
   const comparison = pop(results, "compare_result");
+  const std_output_list = pop(results, "std_output_list");
 
   html.tests = "";
 
   if (
     typeof answers === "object" &&
     typeof truths === "object" &&
-    typeof comparison === "string"
+    typeof comparison === "string" &&
+    typeof std_output_list === "object"
   ) {
-    html.tests = `
-    <h2>Test Cases</h2>
-    `;
+    html.tests = `<h2>Test Cases</h2>`;
     answers.map((answer, i) => {
       const expected = truths[i];
       const compare = comparison[i] === "1" ? "🟢" : "🔴";
-      const test = JSON.stringify(testJSON[i]);
+      const stdout = std_output_list[i];
+
+      let inputs_formatted = "";
+      Object.values(testJSON[i]).forEach((input, index) => {
+        inputs_formatted += `<strong>Input ${index + 1}</strong>  : ${input}\n`;
+      });
+      inputs_formatted = inputs_formatted.trim();
+
       html.tests += `
       <pre>
-      <strong>Input</strong>:   : ${test}
+      ${inputs_formatted}
       <strong>Expected</strong> : ${expected}
       <strong>Answer</strong>   : ${answer}
       <strong>Correct</strong>  : ${compare}
+      <strong>STDOUT</strong>   : ${stdout}
       </pre>
       `.replace(/\n      /g, "\n");
     });
@@ -335,25 +343,24 @@ function parseResults(
   if (last_testcase) {
     const inputs = last_testcase.toString().split("\n");
     const code_output = pop(results, "code_output");
-    const std_output = pop(results, "std_output") || "N/A";
+    const std_output = pop(results, "std_output");
     const expected_output = pop(results, "expected_output");
 
     let inputs_formatted = "";
     inputs.forEach((input, index) => {
-      inputs_formatted += `<strong>Input ${index + 1}</strong>: ${input}\n`;
+      inputs_formatted += `<strong>Input ${index + 1}</strong> : ${input}\n`;
     });
+    inputs_formatted = inputs_formatted.trim();
 
+    html.errors += `<h2>Failure Details</h2>`;
     html.errors += `
-    <h2>Failure Details</h2>
-    <h3>Inputs</h3>
-    <pre>${inputs_formatted}</pre>
-    <h3>Output</h3>
-    <pre>${code_output}</pre>
-    <h3>Expected</h3>
-    <pre>${expected_output}</pre>
-    <h3>STDOUT</h3>
-    <pre>${std_output}</pre>
-    `;
+    <pre>
+    ${inputs_formatted}
+    <strong>Expected</strong>: ${expected_output}
+    <strong>Answer</strong>  : ${code_output}
+    <strong>STDOUT</strong>  : ${std_output}
+    </pre>
+    `.replace(/\n    /g, "\n");
   }
 
   // Format Details
@@ -362,7 +369,7 @@ function parseResults(
   <h2>Additional Information</h2>
   <details>
   <summary>Click here to view additional information</summary><br />
-  <pre>${JSON.stringify(results, null, 2)}</pre>
+  <pre>${JSON.stringify(results, null, 4)}</pre>
   </details>
   </body>
   </html>
@@ -419,7 +426,7 @@ async function updateResults(parsed: Object) {
     const start = document.positionAt(match.indices[1][0]);
     const end = document.positionAt(match.indices[1][1]);
     const range = new vscode.Range(start, end);
-    const results = `\n${JSON.stringify(parsed, null, 2)}\n`;
+    const results = `\n${JSON.stringify(parsed, null, 4)}\n`;
     editBuilder.replace(range, results);
   });
 }

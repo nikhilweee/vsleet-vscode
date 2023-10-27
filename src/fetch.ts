@@ -240,7 +240,7 @@ function generateCode(
     });
     testCases.push(testCase);
   });
-  const testString = JSON.stringify(testCases, null, 2);
+  const testString = JSON.stringify(testCases, null, 4);
 
   // Header
   let code = `# ${question.id}-${question.slug}.py`;

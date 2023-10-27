@@ -52,12 +52,15 @@ async function checkExecution(
         await new Promise((resolve) => setTimeout(resolve, 5000));
         let res = await ltJudge.checkStatus(checkId, slug);
         if (res.state === "SUCCESS") {
+          const [cssUri, localResourceRoots] = getCssUri();
           const panel = vscode.window.createWebviewPanel(
             "leetcode",
             `${command} Results`,
-            { preserveFocus: true, viewColumn: vscode.ViewColumn.Beside }
+            { preserveFocus: true, viewColumn: vscode.ViewColumn.Beside },
+            { localResourceRoots: localResourceRoots }
           );
-          const results = parseResults(res, command, testJSON);
+          const cssSrc = panel.webview.asWebviewUri(cssUri).toString();
+          const results = parseResults(res, command, testJSON, cssSrc);
           panel.webview.html = results.formatted;
           updateResults(results.parsed)
             .then()
@@ -168,7 +171,12 @@ export function parseEditor(parseTests = true) {
   return parsed;
 }
 
-function parseResults(results: Object, command: string, testJSON: Object[]) {
+function parseResults(
+  results: Object,
+  command: string,
+  testJSON: Object[],
+  cssSrc: string
+) {
   const html: Object = {};
   const parsed: Object = {};
 
@@ -186,7 +194,7 @@ function parseResults(results: Object, command: string, testJSON: Object[]) {
     typeof comparison === "string"
   ) {
     html.tests = `
-    <h3>Test Cases</h3>
+    <h2>Test Cases</h2>
     `;
     answers.map((answer, i) => {
       const expected = truths[i];
@@ -199,7 +207,7 @@ function parseResults(results: Object, command: string, testJSON: Object[]) {
       Answer   : ${answer}
       Correct  : ${compare}
       </pre>
-      `;
+      `.replace(/\n      /g, "\n");
     });
   }
 
@@ -208,6 +216,10 @@ function parseResults(results: Object, command: string, testJSON: Object[]) {
   const num_total = pop(results, "total_testcases");
   const num_correct = pop(results, "total_correct");
   const status_msg = pop(results, "status_msg");
+  html.heading = `<h1>${command} Results</h1>`;
+  html.heading += `<strong>Status</strong>: ${status_msg}<br/>`;
+  parsed.type = command;
+  parsed.status = status_msg.toString();
 
   if (num_total) {
     let emoji = "🔴";
@@ -216,16 +228,10 @@ function parseResults(results: Object, command: string, testJSON: Object[]) {
     } else if (typeof num_correct === "number" && num_correct > 0) {
       emoji = "🟡";
     }
-    html.heading = `<h2>${command} ${status_msg}: `;
-    html.heading += `${num_correct} / ${num_total} ${emoji}</h2>`;
-    parsed.type = command;
-    parsed.status = status_msg.toString();
+    html.heading += `<strong>Passed</strong>: `;
+    html.heading += `${num_correct} / ${num_total} ${emoji}<br/>`;
     parsed.num_total = num_total.toString();
     parsed.num_correct = num_correct.toString();
-  } else {
-    html.heading = `<h2>${command} ${status_msg}</h2>`;
-    parsed.type = command;
-    parsed.status = status_msg.toString();
   }
 
   // Format Statuses
@@ -259,7 +265,7 @@ function parseResults(results: Object, command: string, testJSON: Object[]) {
   parsed.result_time = new Date().toJSON();
 
   html.status = `
-  <h3>${command} Status</h3>
+  <h2>Performance</h2>
   <ul>
   ${runtime_status}
   ${memory_status}
@@ -275,14 +281,15 @@ function parseResults(results: Object, command: string, testJSON: Object[]) {
   const invalid_testcase = pop(results, "invalid_testcase");
   if (invalid_testcase) {
     html.errors += `
-    <h3>Invalid Testcase</h3>
+    <h2>Error</h2>
+    <pre>Invalid Testcase</pre>
     `;
   }
 
   const runtime_error = pop(results, "runtime_error");
   if (runtime_error) {
     html.errors += `
-    <h3>Error</h3>
+    <h2>Error</h2>
     <pre>${runtime_error}</pre>
     `;
   }
@@ -290,16 +297,42 @@ function parseResults(results: Object, command: string, testJSON: Object[]) {
   const full_runtime_error = pop(results, "full_runtime_error");
   if (runtime_error) {
     html.errors += `
-    <h3>Full Error</h3>
+    <h2>Full Error</h2>
     <pre>${full_runtime_error}</pre>
+    `;
+  }
+
+  const last_testcase = pop(results, "last_testcase");
+  if (last_testcase) {
+    const inputs = last_testcase.toString().split("\n");
+    const code_output = pop(results, "code_output");
+    const std_output = pop(results, "std_output") || "N/A";
+    const expected_output = pop(results, "expected_output");
+
+    let inputs_formatted = "";
+    inputs.forEach((input, index) => {
+      inputs_formatted += `Input ${index + 1}: ${input}\n`;
+    });
+
+    html.errors += `
+    <h2>Failure Details</h2>
+    <h3>Inputs</h3>
+    <pre>${inputs_formatted}</pre>
+    <h3>Output</h3>
+    <pre>${code_output}</pre>
+    <h3>Expected</h3>
+    <pre>${expected_output}</pre>
+    <h3>STDOUT</h3>
+    <pre>${std_output}</pre>
     `;
   }
 
   // Format Details
 
   html.details = `
+  <h2>Additional Information</h2>
   <details>
-  <summary><strong>Additional Information</strong></summary>
+  <summary>Click here to view additional information</summary><br />
   <pre>${JSON.stringify(results, null, 2)}</pre>
   </details>
   </body>
@@ -312,7 +345,7 @@ function parseResults(results: Object, command: string, testJSON: Object[]) {
   <html>
   <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>pre { white-space: pre-wrap; }</style>
+  <link rel="stylesheet" type="text/css" href="${cssSrc}">
   </head>
   <body>
   ${html.heading}
@@ -334,6 +367,33 @@ function pop(object: Object, key: string): string | number | [] {
     delete object[key];
   }
   return value;
+}
+
+function getCssUri(): [vscode.Uri, vscode.Uri[]] {
+  let cssUri = vscode.Uri.from({
+    scheme: "https",
+    authority: "raw.githubusercontent.com",
+    path:
+      "microsoft/vscode/main/extensions/" +
+      "markdown-language-features/media/markdown.css",
+  });
+  const localResourceRoots: vscode.Uri[] = [];
+  const markdownExtension = vscode.extensions.getExtension(
+    "vscode.markdown-language-features"
+  );
+  if (markdownExtension) {
+    cssUri = vscode.Uri.joinPath(
+      markdownExtension.extensionUri,
+      "media",
+      "markdown.css"
+    );
+    const cssRoot = vscode.Uri.joinPath(
+      markdownExtension.extensionUri,
+      "media"
+    );
+    localResourceRoots.push(cssRoot);
+  }
+  return [cssUri, localResourceRoots];
 }
 
 async function updateResults(parsed: Object) {

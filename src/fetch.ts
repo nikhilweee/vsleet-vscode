@@ -12,8 +12,7 @@ import { getCssUri } from "./utils";
 
 class ProblemItem implements vscode.QuickPickItem {
   id: string;
-  frontendId: string;
-  backendId: string;
+  fragment: string;
   description: string;
   label: string;
   detail: string;
@@ -21,9 +20,10 @@ class ProblemItem implements vscode.QuickPickItem {
   title: string;
 
   constructor(question: Question) {
-    this.backendId = question.backendQuestionId.padStart(4, "0");
-    this.frontendId = question.frontendQuestionId.padStart(4, "0");
-    this.id = this.backendId;
+    const backendId = question.backendQuestionId.padStart(4, "0");
+    const frontendId = question.frontendQuestionId.padStart(4, "0");
+    this.id = backendId;
+    this.fragment = `${backendId}/${frontendId}`;
     this.slug = question.titleSlug;
     this.description = "";
     this.title = `[${this.id}] ${question.title}`;
@@ -94,7 +94,7 @@ async function handleAccept(activeItem: ProblemItem, ltGraph: LTGraphAPI) {
   const question: QuestionDisplay = {
     id: activeItem.id,
     slug: activeItem.slug,
-    fragment: activeItem.id,
+    fragment: activeItem.fragment,
   };
   const fileContents = await getCode(question, ltGraph);
 
@@ -243,7 +243,7 @@ function generateCode(
   let header = `
 
   # View this problem directly from your browser
-  # https://leetcode.com/problems/${question.slug}/#${question.fragment}
+  # https://leetcode.com/problems/${question.slug}#${question.fragment}
 
   # This file was generated using the vsleet extension version ${version}
   # https://marketplace.visualstudio.com/items?itemName=nikhilweee.vsleet

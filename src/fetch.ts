@@ -2,6 +2,7 @@
 import * as vscode from "vscode";
 import { LTGraphAPI } from "./api/graph";
 import { Object, Question, Snippet, QuestionMeta } from "./interfaces";
+import { getCssUri } from "./utils";
 
 export class ProblemItem implements vscode.QuickPickItem {
   id: string;
@@ -101,15 +102,18 @@ async function handleAccept(activeItem: ProblemItem, ltGraph: LTGraphAPI) {
 
   // Fetch problem description
   res = await ltGraph.fetchProblem(activeItem.slug);
+  const [cssUri, localResourceRoots] = getCssUri();
   const panel = vscode.window.createWebviewPanel(
     "leetcode",
     activeItem.title,
     vscode.ViewColumn.Beside,
-    { enableScripts: true }
+    { enableScripts: true, localResourceRoots: localResourceRoots }
   );
+  const cssSrc = panel.webview.asWebviewUri(cssUri).toString();
   panel.webview.html = generateHTML(
     activeItem.title,
-    res.data.question.content
+    res.data.question.content,
+    cssSrc
   );
 }
 
@@ -143,11 +147,12 @@ export async function getCode(id: string, slug: string, ltGraph: LTGraphAPI) {
   return fileContents;
 }
 
-function generateHTML(title: string, content: string) {
+function generateHTML(title: string, content: string, cssSrc: string) {
   const html = `
   <html>
   <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="${cssSrc}">
   <style>
     pre { white-space: pre-wrap; }
     header {

@@ -23,4 +23,5 @@ to structure this file.
 - Execution results are also restored while updating template.
 - Switch to using backend question ID.
 - Use markdown CSS from the official extension.
-- Specify both question IDs in problem URL fragment.
+- Switch back to using frontend question ID in filename.
+- Specify backend question ID in problem URL fragment.

@@ -132,9 +132,9 @@ export async function getCode(slug: string, ltGraph: LTGraphAPI) {
   const tests = q.exampleTestcaseList;
   const meta = JSON.parse(q.metaData);
   const question: QuestionDisplay = {
-    id: q.backendQuestionId,
+    id: q.frontendQuestionId,
     slug: slug,
-    fragment: `${q.backendQuestionId}/${q.frontendQuestionId}`,
+    fragment: q.backendQuestionId,
   };
 
   // Fetch editor contents

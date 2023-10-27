@@ -91,22 +91,12 @@ export function parseEditor(parseTests = true) {
   let id = 0;
   let fragment = "";
 
-  // Parse problem details
-  const reName = RegExp("# (\\d*)-([\\w-]*).py");
-  const matchName = reName.exec(text);
-  if (matchName && matchName.length >= 3) {
-    slug = matchName[2];
-    id = parseInt(matchName[1]);
-    fragment = matchName[1];
-  }
-
   // Parse problem fragment
   const reFragment = RegExp(
-    "# https:\\/\\/leetcode\\.com\\/problems\\" +
-      "/([\\w-]*)#([\\d]{4})\\/([\\d]{4})"
+    "# https:\\/\\/leetcode\\.com\\/problems\\/([\\w-]*)#([\\d]{4})"
   );
   const matchFragment = reFragment.exec(text);
-  if (!matchFragment || matchFragment.length < 4) {
+  if (!matchFragment || matchFragment.length < 3) {
     vscode.window.showWarningMessage(
       `Cannot parse problem fragment.
       Please run vsleet: Update Template
@@ -115,7 +105,19 @@ export function parseEditor(parseTests = true) {
   } else {
     slug = slug || matchFragment[1];
     id = id || parseInt(matchFragment[2]);
-    fragment = `${matchFragment[2]}/${matchFragment[3]}`;
+    fragment = matchFragment[2];
+  }
+
+  if (!id) {
+    // Parse problem details
+    const reName = RegExp("# (\\d*)-([\\w-]*).py");
+    const matchName = reName.exec(text);
+    if (matchName && matchName.length >= 3) {
+      vscode.window.showWarningMessage(`Parsed problem ID may be incorrect.`);
+      slug = matchName[2];
+      id = parseInt(matchName[1]);
+      fragment = matchName[1];
+    }
   }
 
   if (!id) {

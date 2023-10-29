@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import * as vscode from "vscode";
+import { Object } from "../interfaces";
 
 export class LTJudgeAPI {
   private cookie = "";
@@ -20,8 +21,8 @@ export class LTJudgeAPI {
 
   async checkStatus(checkId: string, slug: string) {
     const url = `https://leetcode.com/submissions/detail/${checkId}/check/`;
-
-    return this.judgeAPICall(url, slug, null);
+    const headers = { referer: `https://leetcode.com/problems/${slug}/` };
+    return this.judgeAPICall(url, headers, null);
   }
 
   async submitSolution(id: number, slug: string, code: string) {
@@ -32,8 +33,8 @@ export class LTJudgeAPI {
     });
 
     const url = `https://leetcode.com/problems/${slug}/submit/`;
-
-    return this.judgeAPICall(url, slug, body);
+    const headers = { referer: `https://leetcode.com/problems/${slug}/` };
+    return this.judgeAPICall(url, headers, body);
   }
 
   async runSolution(id: number, slug: string, code: string, tests: string) {
@@ -45,11 +46,23 @@ export class LTJudgeAPI {
     });
 
     const url = `https://leetcode.com/problems/${slug}/interpret_solution/`;
-
-    return this.judgeAPICall(url, slug, body);
+    const headers = { referer: `https://leetcode.com/problems/${slug}/` };
+    return this.judgeAPICall(url, headers, body);
   }
 
-  async prepareHeaders(slug: string) {
+  async session(body: string) {
+    const url = `https://leetcode.com/session/`;
+    const headers = {
+      "x-requested-with": "XMLHttpRequest",
+      "user-agent":
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) " +
+        "AppleWebKit/537.36 (KHTML, like Gecko) " +
+        "Chrome/118.0.0.0 Safari/537.36",
+    };
+    return this.judgeAPICall(url, headers, body);
+  }
+
+  async prepareHeaders(incomingHeaders: Object) {
     let csrftoken = "";
 
     let token = this.cookie.split(";").find((element) => {
@@ -72,9 +85,9 @@ export class LTJudgeAPI {
 
     const headers = {
       "content-type": "application/json",
-      referer: `https://leetcode.com/problems/${slug}/`,
       "x-csrftoken": csrftoken,
       cookie: this.cookie,
+      ...incomingHeaders,
     };
 
     return headers;
@@ -82,15 +95,18 @@ export class LTJudgeAPI {
 
   async judgeAPICall(
     url: string,
-    slug: string,
+    headers: Object,
     body: string | null
   ): Promise<any> {
+    const csrfHeaders = await this.prepareHeaders(headers);
     const res = await fetch(url, {
-      headers: await this.prepareHeaders(slug),
+      headers: csrfHeaders,
       body: body,
       method: "POST",
       credentials: "same-origin",
     });
+    // Use this for debugging.
+    // res.text().then((data) => console.log(data));
     return res.json();
   }
 }

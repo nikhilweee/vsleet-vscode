@@ -20,7 +20,9 @@
     "leetcode"
   ],
   "preview": true,
-  "activationEvents": [],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
@@ -99,7 +101,16 @@
         "mac": "cmd+shift+enter",
         "when": "editorTextFocus"
       }
-    ]
+    ],
+    "icons": {
+      "vsleet-logo": {
+        "description": "vsleet Icon",
+        "default": {
+          "fontPath": "media/vsleet.woff",
+          "fontCharacter": "\\e900"
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",

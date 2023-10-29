@@ -23,3 +23,4 @@ to structure this file.
 - Execution results are also restored while updating template.
 - Use markdown CSS from the official extension.
 - Specify backend question ID in problem URL fragment.
+- Add status bar item with active session information.

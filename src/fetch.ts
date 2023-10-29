@@ -35,11 +35,11 @@ class ProblemItem implements vscode.QuickPickItem {
     switch (question.status) {
       case "ac":
         this.detail += ` | Status: Accepted`;
-        this.label += ` $(check-all)`;
+        this.label += ` $(issue-closed)`;
         break;
       case "notac":
         this.detail += ` | Status: Attempted`;
-        this.label += ` $(check)`;
+        this.label += ` $(issue-opened)`;
         break;
       case null:
         break;

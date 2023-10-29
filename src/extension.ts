@@ -3,10 +3,12 @@ import * as fetch from "./fetch";
 import * as cookie from "./cookie";
 import * as execute from "./execute";
 import * as update from "./update";
+import * as status from "./status";
 
 export function activate(context: vscode.ExtensionContext) {
-  // context.secrets.store("cookie", "");
-
+  // Events
+  const updateStatusBarEmitter = new vscode.EventEmitter();
+  // Commands
   context.subscriptions.push(
     vscode.commands.registerCommand("vsleet.load", () => {
       fetch.handleLoad(context);
@@ -29,7 +31,9 @@ export function activate(context: vscode.ExtensionContext) {
   );
   context.subscriptions.push(
     vscode.commands.registerCommand("vsleet.submit", () => {
-      execute.handleSubmit(context);
+      execute.handleSubmit(context).then(() => {
+        updateStatusBarEmitter.fire(null);
+      });
     })
   );
   context.subscriptions.push(
@@ -37,6 +41,21 @@ export function activate(context: vscode.ExtensionContext) {
       update.handleUpdate(context);
     })
   );
+  // Status Bar
+  const statusBar = vscode.window.createStatusBarItem(
+    vscode.StatusBarAlignment.Left,
+    100
+  );
+  context.subscriptions.push(statusBar);
+
+  // Subscribe to custom events
+  context.subscriptions.push(
+    updateStatusBarEmitter.event((data) => {
+      status.updateStatusBar(statusBar, context);
+    })
+  );
+  // Update status bar once at start
+  status.updateStatusBar(statusBar, context);
 }
 
 export function deactivate() {}

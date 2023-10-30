@@ -3,11 +3,19 @@ import * as fetch from "./fetch";
 import * as cookie from "./cookie";
 import * as execute from "./execute";
 import * as update from "./update";
-import * as status from "./status";
+import * as session from "./session";
 
 export function activate(context: vscode.ExtensionContext) {
-  // Events
-  const updateStatusBarEmitter = new vscode.EventEmitter();
+  // Status Bar
+  const statusBar = vscode.window.createStatusBarItem(
+    vscode.StatusBarAlignment.Left,
+    0
+  );
+  context.subscriptions.push(statusBar);
+
+  // Update status bar once at start
+  session.updateStatusBar(context, statusBar);
+
   // Commands
   context.subscriptions.push(
     vscode.commands.registerCommand("vsleet.load", () => {
@@ -16,7 +24,9 @@ export function activate(context: vscode.ExtensionContext) {
   );
   context.subscriptions.push(
     vscode.commands.registerCommand("vsleet.login", () => {
-      cookie.handleLogin(context);
+      cookie.handleLogin(context).then(() => {
+        session.updateStatusBar(context, statusBar);
+      });
     })
   );
   context.subscriptions.push(
@@ -32,7 +42,7 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand("vsleet.submit", () => {
       execute.handleSubmit(context).then(() => {
-        updateStatusBarEmitter.fire(null);
+        session.updateStatusBar(context, statusBar);
       });
     })
   );
@@ -41,21 +51,11 @@ export function activate(context: vscode.ExtensionContext) {
       update.handleUpdate(context);
     })
   );
-  // Status Bar
-  const statusBar = vscode.window.createStatusBarItem(
-    vscode.StatusBarAlignment.Left,
-    100
-  );
-  context.subscriptions.push(statusBar);
-
-  // Subscribe to custom events
   context.subscriptions.push(
-    updateStatusBarEmitter.event((data) => {
-      status.updateStatusBar(statusBar, context);
+    vscode.commands.registerCommand("vsleet.session", () => {
+      session.handleSession(context, statusBar);
     })
   );
-  // Update status bar once at start
-  status.updateStatusBar(statusBar, context);
 }
 
 export function deactivate() {}

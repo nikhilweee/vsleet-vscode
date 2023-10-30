@@ -59,7 +59,8 @@ export class LTJudgeAPI {
         "AppleWebKit/537.36 (KHTML, like Gecko) " +
         "Chrome/118.0.0.0 Safari/537.36",
     };
-    return this.judgeAPICall(url, headers, body);
+    const method = body === "{}" ? "POST" : "PUT";
+    return this.judgeAPICall(url, headers, body, method);
   }
 
   async prepareHeaders(incomingHeaders: Object) {
@@ -96,13 +97,14 @@ export class LTJudgeAPI {
   async judgeAPICall(
     url: string,
     headers: Object,
-    body: string | null
+    body: string | null,
+    method = "POST"
   ): Promise<any> {
     const csrfHeaders = await this.prepareHeaders(headers);
     const res = await fetch(url, {
       headers: csrfHeaders,
       body: body,
-      method: "POST",
+      method: method,
       credentials: "same-origin",
     });
     // Use this for debugging.

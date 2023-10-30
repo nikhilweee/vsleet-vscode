@@ -39,6 +39,10 @@
         "title": "vsleet: Update Template"
       },
       {
+        "command": "vsleet.session",
+        "title": "vsleet: Select Session"
+      },
+      {
         "command": "vsleet.local",
         "title": "vsleet: Local Solution",
         "icon": {

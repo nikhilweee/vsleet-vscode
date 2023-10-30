@@ -51,19 +51,16 @@ let ltGraph: LTGraphAPI;
 
 export async function handleLoad(context: vscode.ExtensionContext) {
   ltGraph = await LTGraphAPI.getInstance(context);
-  const disposables: vscode.Disposable[] = [];
   const input = vscode.window.createQuickPick<ProblemItem>();
   input.placeholder = "Search Keywords";
   input.title = "Load Problem from LeetCode";
-  disposables.push(
-    input.onDidChangeValue((value) => {
-      handleChange(input, value);
-    }),
-    input.onDidAccept(async () => {
-      const [activeItem] = input.activeItems;
-      handleAccept(activeItem, ltGraph);
-    })
-  );
+  input.onDidChangeValue((value) => {
+    handleChange(input, value);
+  });
+  input.onDidAccept(async () => {
+    const [activeItem] = input.activeItems;
+    handleAccept(activeItem, ltGraph);
+  });
   input.show();
 }
 

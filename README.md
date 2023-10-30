@@ -22,17 +22,19 @@ https://marketplace.visualstudio.com/items?itemName=nikhilweee.vsleet
 ## Commands
 
 - `vsleet: Load Problem`: Load a problem from LeetCode
+- `vsleet: Paste Cookie`: Paste cookie to authenticate
+- `vsleet: Select Session`: Change the active session
+- `vsleet: Update Template`: Update solution template
 - `vsleet: Local Solution`: Run Code Locally
 - `vsleet: Run Solution`: Run solution on LeetCode
 - `vsleet: Submit Solution`: Submit solution to LeetCode
-- `vsleet: Paste Cookie`: Paste cookie to authenticate
-- `vsleet: Update Template`: Update solution template
 
 ## Keyboard Shortcuts
 
 - <kbd>shift</kbd>+<kbd>enter</kbd>: `vsleet: Local Solution`
-- <kbd>cmd</kbd>+<kbd>enter</kbd>: `vsleet: Run Solution`
-- <kbd>cmd</kbd>+<kbd>shift</kbd>+<kbd>enter</kbd>: `vsleet: Submit Solution`
+- <kbd>ctrl/cmd</kbd>+<kbd>enter</kbd>: `vsleet: Run Solution`
+- <kbd>ctrl/cmd</kbd>+<kbd>shift</kbd>+<kbd>enter</kbd>:
+  `vsleet: Submit Solution`
 
 ## Requirements
 

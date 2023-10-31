@@ -5,7 +5,7 @@ All notable changes to the "vsleet" extension will be documented in this file.
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how
 to structure this file.
 
-## [Unreleased]
+## 0.1
 
 - Initial Release.
 - Update README and create a new icon.
@@ -25,3 +25,5 @@ to structure this file.
 - Specify backend question ID in problem URL fragment.
 - Add status bar item with active session information.
 - Add command to change active session.
+
+## [Unreleased]

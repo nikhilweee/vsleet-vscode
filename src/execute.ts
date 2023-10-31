@@ -299,7 +299,7 @@ function parseResults(
     memory_percentile = "";
   }
 
-  parsed.result_ts = new Date().toJSON();
+  parsed.timestamp = new Date().toJSON();
 
   html.status = `
   <h2>Performance</h2>

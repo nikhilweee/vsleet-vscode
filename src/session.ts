@@ -18,7 +18,7 @@ export async function updateStatusBar(
   });
   if (active !== undefined) {
     status.text = `$(vsleet-logo) ${active.name || "anonymous"} `;
-    status.text += `${active.ac_questions}:${active.total_acs}`;
+    status.text += `${active.ac_questions}:${active.total_submitted}`;
     status.tooltip =
       "vsleet Session\n" +
       `ID: ${active.id}\n` +

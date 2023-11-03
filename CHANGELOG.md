@@ -28,4 +28,4 @@ to structure this file.
 
 ## [Unreleased]
 
-- Replace null values with empty strings in default testcases.
+- Handle null, true, and false values in default testcases.

@@ -27,3 +27,5 @@ to structure this file.
 - Add command to change active session.
 
 ## [Unreleased]
+
+- Replace null values with empty strings in default testcases.

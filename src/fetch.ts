@@ -227,6 +227,10 @@ function generateCode(
   const extension = vscode.extensions.getExtension("nikhilweee.vsleet");
   const version = extension?.packageJSON.version;
 
+  function replacer(key: string, value: any) {
+    return value === null ? "" : value;
+  }
+
   // Format tests
   let testCases: Object[] = [];
   tests.forEach((test) => {
@@ -237,7 +241,7 @@ function generateCode(
     });
     testCases.push(testCase);
   });
-  const testString = JSON.stringify(testCases, null, 4);
+  const testString = JSON.stringify(testCases, replacer, 4);
 
   // Header
   let code = `# ${question.id}-${question.slug}.py`;

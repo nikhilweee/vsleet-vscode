@@ -227,10 +227,6 @@ function generateCode(
   const extension = vscode.extensions.getExtension("nikhilweee.vsleet");
   const version = extension?.packageJSON.version;
 
-  function replacer(key: string, value: any) {
-    return value === null ? "" : value;
-  }
-
   // Format tests
   let testCases: Object[] = [];
   tests.forEach((test) => {
@@ -241,7 +237,7 @@ function generateCode(
     });
     testCases.push(testCase);
   });
-  const testString = JSON.stringify(testCases, replacer, 4);
+  const testString = JSON.stringify(testCases, null, 4);
 
   // Header
   let code = `# ${question.id}-${question.slug}.py`;
@@ -256,13 +252,15 @@ function generateCode(
   # Write your solution between vsleet:code:start and vsleet:code:end
   # Write test cases between vsleet:tests:start and vsleet:tests:end
 
-  from typing import List, Dict
+  from typing import List, Dict, Optional
 
   # vsleet:code:start
 
   ${snippet}pass
 
   # vsleet:code:end
+
+  null, true, false = None, True, False
 
   `;
   code += header.replace(/\n  /g, "\n");

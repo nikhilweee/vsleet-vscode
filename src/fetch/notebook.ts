@@ -50,11 +50,10 @@ async function handleAccept(activeItem: ProblemItem, ltGraph: LTGraphAPI) {
     },
     async (progress, token) => {
       // Fetch problem description
-      progress.report({ message: "Fetching Problem" });
+      progress.report({ message: "Creating Notebook" });
       const code = await getCode(activeItem.slug, ltGraph);
       const path = `${code.question.id}-${code.question.slug}.ipynb`;
       // Create empty notebook with suggested filename
-      progress.report({ message: "Creating Notebook" });
       const document = await vscode.workspace.openNotebookDocument(
         vscode.Uri.from({ scheme: "untitled", path: path })
       );
@@ -68,13 +67,16 @@ async function handleAccept(activeItem: ProblemItem, ltGraph: LTGraphAPI) {
       ]);
       await vscode.workspace.applyEdit(edit);
       // Show notebook
-      await vscode.window.showNotebookDocument(document, {
-        viewColumn: vscode.ViewColumn.Active,
-      });
-      // Apply formatting after a while
-      progress.report({ message: "Formatting Notebook" });
-      await new Promise((f) => setTimeout(f, 2000));
-      await vscode.commands.executeCommand("notebook.format");
+      vscode.window
+        .showNotebookDocument(document, {
+          viewColumn: vscode.ViewColumn.Active,
+        })
+        .then((editor) => {
+          setTimeout(() => {
+            // Apply formatting after a while
+            vscode.commands.executeCommand("notebook.format");
+          }, 5000);
+        });
     }
   );
 }
@@ -236,6 +238,22 @@ function generateCells(
       vscode.NotebookCellKind.Code,
       headerpy + testcasespy + runnerpy + resultspy,
       "python"
+    )
+  );
+
+  let notesmd = `
+  ## Notes
+  * Problem Caveats
+  * Initial Iterations
+  * Alternative Approaches
+  * Future Improvements
+  `;
+
+  cells.push(
+    new vscode.NotebookCellData(
+      vscode.NotebookCellKind.Markup,
+      notesmd,
+      "markdown"
     )
   );
 

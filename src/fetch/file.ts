@@ -50,11 +50,10 @@ async function handleAccept(activeItem: ProblemItem, ltGraph: LTGraphAPI) {
       cancellable: true,
     },
     async (progress, token) => {
-      progress.report({ message: "Fetching Solution" });
+      progress.report({ message: "Creating Template" });
       const code = await getCode(activeItem.slug, ltGraph);
       const path = `${code.question.id}-${code.question.slug}.py`;
       // Create empty file with suggested filename
-      progress.report({ message: "Creating File" });
       const document = await vscode.workspace.openTextDocument(
         vscode.Uri.from({ scheme: "untitled", path: path })
       );
@@ -65,20 +64,22 @@ async function handleAccept(activeItem: ProblemItem, ltGraph: LTGraphAPI) {
       ]);
       await vscode.workspace.applyEdit(edit);
       // Show notebook
-      await vscode.window.showTextDocument(document, {
-        viewColumn: vscode.ViewColumn.Active,
-      });
-      // Apply formatting after a while
-      progress.report({ message: "Formatting File" });
-      await new Promise((f) => setTimeout(f, 2000));
-      await vscode.commands.executeCommand("editor.action.formatDocument");
+      vscode.window
+        .showTextDocument(document, {
+          viewColumn: vscode.ViewColumn.Active,
+        })
+        .then((editor) => {
+          setTimeout(() => {
+            // Apply formatting after a while
+            vscode.commands.executeCommand("editor.action.formatDocument");
+          }, 2000);
+        });
 
       // Fetch problem description
-      progress.report({ message: "Fetching Problem" });
+      progress.report({ message: "Loading Problem" });
       const res = await ltGraph.fetchProblem(activeItem.slug);
       const [cssUri, localResourceRoots] = getCssUri();
       // Create webview panel
-      progress.report({ message: "Showing Problem" });
       const panel = vscode.window.createWebviewPanel(
         "leetcode",
         activeItem.title,

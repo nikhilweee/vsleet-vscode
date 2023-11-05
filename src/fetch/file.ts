@@ -43,41 +43,60 @@ async function handleChange(
 }
 
 async function handleAccept(activeItem: ProblemItem, ltGraph: LTGraphAPI) {
-  let res = null;
-
-  const fileContents = await getCode(activeItem.slug, ltGraph);
-
-  // Open existing or create new file
-  // const document = await getTextDocument(fileName, fileContents);
-
-  const document = await vscode.workspace.openTextDocument({
-    content: fileContents,
-    language: "python",
-  });
-  vscode.window
-    .showTextDocument(document, vscode.ViewColumn.Active)
-    .then(() => {
-      vscode.commands.executeCommand("editor.action.formatDocument");
-    });
-
-  // Fetch problem description
-  res = await ltGraph.fetchProblem(activeItem.slug);
-  const [cssUri, localResourceRoots] = getCssUri();
-  const panel = vscode.window.createWebviewPanel(
-    "leetcode",
-    activeItem.title,
-    { preserveFocus: true, viewColumn: vscode.ViewColumn.Beside },
+  await vscode.window.withProgress(
     {
-      enableScripts: true,
-      enableForms: false,
-      localResourceRoots: localResourceRoots,
+      location: vscode.ProgressLocation.Notification,
+      title: `vsleet`,
+      cancellable: true,
+    },
+    async (progress, token) => {
+      progress.report({ message: "Fetching Solution" });
+      const code = await getCode(activeItem.slug, ltGraph);
+      const path = `${code.question.id}-${code.question.slug}.py`;
+      // Create empty file with suggested filename
+      progress.report({ message: "Creating File" });
+      const document = await vscode.workspace.openTextDocument(
+        vscode.Uri.from({ scheme: "untitled", path: path })
+      );
+      // Edit file and insert template data
+      const edit = new vscode.WorkspaceEdit();
+      edit.set(document.uri, [
+        vscode.TextEdit.insert(new vscode.Position(0, 0), code.contents),
+      ]);
+      await vscode.workspace.applyEdit(edit);
+      // Show notebook
+      await vscode.window.showTextDocument(document, {
+        viewColumn: vscode.ViewColumn.Active,
+      });
+      // Apply formatting after a while
+      progress.report({ message: "Formatting File" });
+      await new Promise((f) => setTimeout(f, 2000));
+      await vscode.commands.executeCommand("editor.action.formatDocument");
+
+      // Fetch problem description
+      progress.report({ message: "Fetching Problem" });
+      const res = await ltGraph.fetchProblem(activeItem.slug);
+      const [cssUri, localResourceRoots] = getCssUri();
+      // Create webview panel
+      progress.report({ message: "Showing Problem" });
+      const panel = vscode.window.createWebviewPanel(
+        "leetcode",
+        activeItem.title,
+        { preserveFocus: true, viewColumn: vscode.ViewColumn.Beside },
+        {
+          enableScripts: true,
+          enableForms: false,
+          localResourceRoots: localResourceRoots,
+        }
+      );
+      // Update webview panel
+      const cssSrc = panel.webview.asWebviewUri(cssUri).toString();
+      panel.webview.html = generateHTML(
+        activeItem.title,
+        res.data.question.content,
+        cssSrc
+      );
     }
-  );
-  const cssSrc = panel.webview.asWebviewUri(cssUri).toString();
-  panel.webview.html = generateHTML(
-    activeItem.title,
-    res.data.question.content,
-    cssSrc
   );
 }
 
@@ -114,7 +133,7 @@ export async function getCode(slug: string, ltGraph: LTGraphAPI) {
   }
 
   const fileContents = generateCode(question, snippet.code, tests, meta);
-  return fileContents;
+  return { contents: fileContents, question: question };
 }
 
 function generateHTML(title: string, content: string, cssSrc: string) {
@@ -198,14 +217,13 @@ function generateCode(
   const testString = JSON.stringify(testCases, null, 4);
 
   // Header
-  let code = `# ${question.id}-${question.slug}.py`;
+  let code = "";
   let header = `
+  # This file was generated using the vsleet extension (version ${version})
+  # https://marketplace.visualstudio.com/items?itemName=nikhilweee.vsleet
 
   # View this problem directly from your browser
   # https://leetcode.com/problems/${question.slug}#${question.fragment}
-
-  # This file was generated using the vsleet extension version ${version}
-  # https://marketplace.visualstudio.com/items?itemName=nikhilweee.vsleet
 
   # Write your solution between vsleet:code:start and vsleet:code:end
   # Write test cases between vsleet:tests:start and vsleet:tests:end

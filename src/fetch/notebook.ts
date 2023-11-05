@@ -45,14 +45,16 @@ async function handleAccept(activeItem: ProblemItem, ltGraph: LTGraphAPI) {
   await vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Notification,
-      title: `vsleet: Fetching Problem`,
+      title: `vsleet`,
       cancellable: true,
     },
     async (progress, token) => {
       // Fetch problem description
+      progress.report({ message: "Fetching Problem" });
       const code = await getCode(activeItem.slug, ltGraph);
       const path = `${code.question.id}-${code.question.slug}.ipynb`;
       // Create empty notebook with suggested filename
+      progress.report({ message: "Creating Notebook" });
       const document = await vscode.workspace.openNotebookDocument(
         vscode.Uri.from({ scheme: "untitled", path: path })
       );
@@ -70,7 +72,8 @@ async function handleAccept(activeItem: ProblemItem, ltGraph: LTGraphAPI) {
         viewColumn: vscode.ViewColumn.Active,
       });
       // Apply formatting after a while
-      await new Promise((f) => setTimeout(f, 5000));
+      progress.report({ message: "Formatting Notebook" });
+      await new Promise((f) => setTimeout(f, 2000));
       await vscode.commands.executeCommand("notebook.format");
     }
   );

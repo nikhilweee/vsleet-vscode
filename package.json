@@ -32,6 +32,10 @@
         "title": "vsleet: Load Problem"
       },
       {
+        "command": "vsleet.notebook",
+        "title": "vsleet: Load Notebook"
+      },
+      {
         "command": "vsleet.login",
         "title": "vsleet: Paste Cookie"
       },

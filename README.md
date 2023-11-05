@@ -5,11 +5,13 @@ VS Code extension for solving LeetCode problems directly from the editor.
 https://marketplace.visualstudio.com/items?itemName=nikhilweee.vsleet
 
 - **⚠️** This extension is under active development.
+- **⚠️** Backward compatibility is not guaranteed.
 - **⚠️** This extension only supports `python3` for now.
 
 ## Features
 
 - Search and load problems directly from VS Code.
+- Load problem as a python file or jupyter notebook.
 - Test solution locally in your favourite editor.
 - Start with boilerplate complete with default tests.
 - Run and submit to leetcode directly from VS Code.
@@ -22,6 +24,7 @@ https://marketplace.visualstudio.com/items?itemName=nikhilweee.vsleet
 ## Commands
 
 - `vsleet: Load Problem`: Load a problem from LeetCode
+- `vsleet: Load Notebook`: Load problem as jupyter notebook
 - `vsleet: Paste Cookie`: Paste cookie to authenticate
 - `vsleet: Select Session`: Change the active session
 - `vsleet: Update Template`: Update solution template

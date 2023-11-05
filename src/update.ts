@@ -37,7 +37,7 @@ export async function handleUpdate(context: vscode.ExtensionContext) {
     const start = document.positionAt(0);
     const end = document.positionAt(currentCodeLength);
     const range = new vscode.Range(start, end);
-    editBuilder.replace(range, newCode);
+    editBuilder.replace(range, newCode.contents);
   });
 
   // Restore previous solution

@@ -10,7 +10,7 @@ import {
 } from "./interfaces";
 import { getCssUri } from "./utils";
 
-class ProblemItem implements vscode.QuickPickItem {
+export class ProblemItem implements vscode.QuickPickItem {
   // Inherited attributes
   description: string;
   label: string;

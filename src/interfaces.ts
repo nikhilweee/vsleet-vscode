@@ -22,6 +22,8 @@ export interface QuestionDisplay {
   id: string;
   slug: string;
   fragment: string;
+  title?: string;
+  content?: string;
 }
 
 export interface QuestionMeta {

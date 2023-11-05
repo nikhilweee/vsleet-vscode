@@ -1,10 +1,10 @@
 import * as vscode from "vscode";
-import * as fetch from "./fetch";
+import * as fetch from "./fetch/file";
 import * as cookie from "./cookie";
 import * as execute from "./execute";
 import * as update from "./update";
 import * as session from "./session";
-import * as notebook from "./notebook";
+import * as notebook from "./fetch/notebook";
 
 export function activate(context: vscode.ExtensionContext) {
   // Status Bar

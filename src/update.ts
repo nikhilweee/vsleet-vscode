@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { parseEditor } from "./execute";
-import { getCode } from "./fetch";
+import { getCode } from "./fetch/file";
 import { LTGraphAPI } from "./api/graph";
 
 export async function handleUpdate(context: vscode.ExtensionContext) {

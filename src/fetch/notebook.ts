@@ -1,10 +1,8 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import * as vscode from "vscode";
-import { LTGraphAPI } from "./api/graph";
-import { ProblemItem } from "./fetch";
-import { Object, Snippet, QuestionMeta, QuestionDisplay } from "./interfaces";
-import { getCssUri } from "./utils";
-import { posix } from "path";
+import { LTGraphAPI } from "../api/graph";
+import { ProblemItem } from "./base";
+import { Object, Snippet, QuestionMeta, QuestionDisplay } from "../interfaces";
 
 let ltGraph: LTGraphAPI;
 
@@ -145,6 +143,11 @@ function generateCells(
   // Add header cell
 
   let headermd = `
+  ## ${question.id} ${question.title}
+
+  View this problem directly from your browser  
+  https://leetcode.com/problems/${question.slug}#${question.fragment}
+
   This notebook was generated using the vsleet extension (version ${version})  
   https://marketplace.visualstudio.com/items?itemName=nikhilweee.vsleet
 
@@ -163,11 +166,6 @@ function generateCells(
   // Add question content
 
   let contentsmd = `## Question
-
-  ### ${question.id} ${question.title}
-
-  View this problem directly from your browser  
-  https://leetcode.com/problems/${question.slug}#${question.fragment}
 
   ${question.content}
   `;
@@ -191,6 +189,8 @@ function generateCells(
   );
 
   let headerpy = `
+  # https://leetcode.com/problems/${question.slug}#${question.fragment}
+
   from typing import List, Dict, Optional
 
   # vsleet:code:start
@@ -198,48 +198,17 @@ function generateCells(
   ${snippet}pass
 
   # vsleet:code:end
+
   `.replace(/\n  /g, "\n");
 
-  cells.push(
-    new vscode.NotebookCellData(
-      vscode.NotebookCellKind.Code,
-      headerpy,
-      "python"
-    )
-  );
-
   // Add tests cell
-
-  cells.push(
-    new vscode.NotebookCellData(
-      vscode.NotebookCellKind.Markup,
-      "## Test Cases",
-      "markdown"
-    )
-  );
 
   let testcasespy = "null, true, false = None, True, False\n\n";
   testcasespy += "# vsleet:tests:start\n\n";
   testcasespy += `testcases = ${testString}\n\n`;
-  testcasespy += "# vsleet:tests:end";
-
-  cells.push(
-    new vscode.NotebookCellData(
-      vscode.NotebookCellKind.Code,
-      testcasespy,
-      "python"
-    )
-  );
+  testcasespy += "# vsleet:tests:end\n\n";
 
   // Add runner cell
-
-  cells.push(
-    new vscode.NotebookCellData(
-      vscode.NotebookCellKind.Markup,
-      "## Run Locally",
-      "markdown"
-    )
-  );
 
   let runnerpy = `
   if __name__ == "__main__":
@@ -250,23 +219,7 @@ function generateCells(
       print("result:", result)
   `.replace(/\n  /g, "\n");
 
-  cells.push(
-    new vscode.NotebookCellData(
-      vscode.NotebookCellKind.Code,
-      runnerpy,
-      "python"
-    )
-  );
-
   // Add results cell
-
-  cells.push(
-    new vscode.NotebookCellData(
-      vscode.NotebookCellKind.Markup,
-      "## Results",
-      "markdown"
-    )
-  );
 
   let resultspy = `
   # vsleet:results:start
@@ -278,7 +231,7 @@ function generateCells(
   cells.push(
     new vscode.NotebookCellData(
       vscode.NotebookCellKind.Code,
-      resultspy,
+      headerpy + testcasespy + runnerpy + resultspy,
       "python"
     )
   );

@@ -53,9 +53,10 @@ async function handleAccept(activeItem: ProblemItem, ltGraph: LTGraphAPI) {
       progress.report({ message: "Creating Notebook" });
       const code = await getCode(activeItem.slug, ltGraph);
       const path = `${code.question.id}-${code.question.slug}.ipynb`;
+      const pathUri = vscode.Uri.file(path);
       // Create empty notebook with suggested filename
       const document = await vscode.workspace.openNotebookDocument(
-        vscode.Uri.from({ scheme: "untitled", path: path })
+        pathUri.with({ scheme: "untitled" })
       );
       // Edit notebook and insert template data
       const edit = new vscode.WorkspaceEdit();

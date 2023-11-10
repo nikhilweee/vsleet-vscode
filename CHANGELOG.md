@@ -30,3 +30,4 @@ to structure this file.
 
 - Handle null, true, and false values in default testcases.
 - Add option to load notebook instead of python file.
+- Fix bug which prevented saving newly opened problem.

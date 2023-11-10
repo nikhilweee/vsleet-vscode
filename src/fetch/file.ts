@@ -50,13 +50,28 @@ async function handleAccept(activeItem: ProblemItem, ltGraph: LTGraphAPI) {
       cancellable: true,
     },
     async (progress, token) => {
+      // Fetch problem description
       progress.report({ message: "Creating Template" });
       const code = await getCode(activeItem.slug, ltGraph);
       const path = `${code.question.id}-${code.question.slug}.py`;
+      let pathUri = vscode.Uri.file(path);
+      if (vscode.workspace.workspaceFolders) {
+        const folder = vscode.workspace.workspaceFolders[0];
+        pathUri = vscode.Uri.joinPath(folder.uri, path);
+      }
       // Create empty file with suggested filename
-      const document = await vscode.workspace.openTextDocument(
-        vscode.Uri.from({ scheme: "untitled", path: path })
-      );
+      try {
+        await vscode.workspace.fs.stat(pathUri);
+        // path exists, add unix epoch to filename
+        const stem = pathUri.path.split(".").shift();
+        const epoch = Math.floor(Date.now() / 1000);
+        const path = `${stem}-${epoch}.py`;
+        pathUri = pathUri.with({ scheme: "untitled", path: path });
+      } catch {
+        // path does not exist, continue as is
+        pathUri = pathUri.with({ scheme: "untitled" });
+      }
+      const document = await vscode.workspace.openTextDocument(pathUri);
       // Edit file and insert template data
       const edit = new vscode.WorkspaceEdit();
       edit.set(document.uri, [

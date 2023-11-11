@@ -16,7 +16,9 @@ export async function handleLoad(context: vscode.ExtensionContext) {
   });
   input.onDidAccept(async () => {
     const [activeItem] = input.activeItems;
-    handleAccept(activeItem, ltGraph);
+    if (activeItem) {
+      handleAccept(activeItem, ltGraph);
+    }
   });
   input.show();
 }

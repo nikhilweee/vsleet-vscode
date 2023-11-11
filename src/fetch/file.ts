@@ -23,7 +23,9 @@ export async function handleLoad(context: vscode.ExtensionContext) {
   });
   input.onDidAccept(async () => {
     const [activeItem] = input.activeItems;
-    handleAccept(activeItem, ltGraph);
+    if (activeItem) {
+      handleAccept(activeItem, ltGraph);
+    }
   });
   input.show();
 }
@@ -229,7 +231,7 @@ function generateCode(
   const instance = className.toLowerCase();
   const testCases = generateRunner(tests, meta);
   const testString = JSON.stringify(testCases, null, 4);
-  snippet = snippet.replace(/(\ *def.*:\n\ *)\n/g, "$1pass");
+  snippet = snippet.replace(/(\ *def.*:\n\ +)/g, "$1pass");
 
   // Header
   let code = "";

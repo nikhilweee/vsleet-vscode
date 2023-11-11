@@ -176,7 +176,7 @@ export function parseEditor(parseTests = true) {
     const testJSON = JSON5.parse(resultsTestCases[0]);
     let tests = "";
     testJSON.forEach((testcase: Object) => {
-      for (let value of Object.values(testcase)) {
+      for (let value of testcase[1]) {
         tests += JSON.stringify(value);
         tests += "\n";
       }

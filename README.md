@@ -23,14 +23,15 @@ https://marketplace.visualstudio.com/items?itemName=nikhilweee.vsleet
 
 ## Commands
 
-- `vsleet: Load Problem`: Load a problem from LeetCode
-- `vsleet: Load Notebook`: Load problem as jupyter notebook
+- `vsleet: New Problem`: Load a problem from LeetCode
+- `vsleet: New Notebook`: Load problem as Jupyter notebook
 - `vsleet: Paste Cookie`: Paste cookie to authenticate
 - `vsleet: Select Session`: Change the active session
 - `vsleet: Update Template`: Update solution template
 - `vsleet: Local Solution`: Run Code Locally
 - `vsleet: Run Solution`: Run solution on LeetCode
 - `vsleet: Submit Solution`: Submit solution to LeetCode
+- `vsleet: Open Description`: Open problem description
 
 ## Keyboard Shortcuts
 
@@ -47,7 +48,7 @@ The other commands do not require any dependencies.
 
 ## Authentication
 
-Although you can use the `vsleet: Load Problem` and `vsleet: Local Solution`
+Although you can use the `vsleet: New Problem` and `vsleet: Local Solution`
 commands freely without authentication, you need to be authenticated to
 leetcode.com to run `vsleet: Run Solution` and `vsleet: Submit Solution`.
 

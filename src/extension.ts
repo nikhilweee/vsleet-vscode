@@ -62,6 +62,11 @@ export function activate(context: vscode.ExtensionContext) {
       session.handleSession(context, statusBar);
     })
   );
+  context.subscriptions.push(
+    vscode.commands.registerCommand("vsleet.description", () => {
+      update.handleDescription(context);
+    })
+  );
 }
 
 export function deactivate() {}

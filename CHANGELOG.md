@@ -32,3 +32,4 @@ to structure this file.
 - Add option to load notebook instead of python file.
 - Fix bug which prevented saving newly opened problem.
 - Add support for multiple methods in solution class.
+- Add command to open description for an existing template.

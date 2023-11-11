@@ -100,7 +100,7 @@ async function handleAccept(activeItem: ProblemItem, ltGraph: LTGraphAPI) {
 
       // Fetch problem description
       progress.report({ message: "Loading Problem" });
-      const res = await ltGraph.fetchProblem(activeItem.slug);
+      const res = await ltGraph.fetchContent(activeItem.slug);
       const [cssUri, localResourceRoots] = getCssUri();
       // Create webview panel
       const panel = vscode.window.createWebviewPanel(
@@ -160,7 +160,7 @@ export async function getCode(slug: string, ltGraph: LTGraphAPI) {
   return { contents: fileContents, question: question };
 }
 
-function generateHTML(title: string, content: string, cssSrc: string) {
+export function generateHTML(title: string, content: string, cssSrc: string) {
   const html = `
   <html>
   <head>

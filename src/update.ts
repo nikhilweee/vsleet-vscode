@@ -1,7 +1,8 @@
 import * as vscode from "vscode";
 import { parseEditor } from "./execute";
-import { getCode } from "./fetch/file";
+import { getCode, generateHTML } from "./fetch/file";
 import { LTGraphAPI } from "./api/graph";
+import { getCssUri } from "./utils";
 
 export async function handleUpdate(context: vscode.ExtensionContext) {
   const ltGraph = await LTGraphAPI.getInstance(context);
@@ -10,7 +11,7 @@ export async function handleUpdate(context: vscode.ExtensionContext) {
   const newCode = await vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Notification,
-      title: `vsleet: Updating template`,
+      title: `vsleet: Updating Template`,
       cancellable: true,
     },
     async (progress, token) => {
@@ -72,4 +73,46 @@ export async function handleUpdate(context: vscode.ExtensionContext) {
   }
 
   await vscode.commands.executeCommand("editor.action.formatDocument");
+}
+
+export async function handleDescription(context: vscode.ExtensionContext) {
+  const ltGraph = await LTGraphAPI.getInstance(context);
+  const parsed = parseEditor(false);
+
+  const newCode = await vscode.window.withProgress(
+    {
+      location: vscode.ProgressLocation.Notification,
+      title: `vsleet: Opening Description`,
+      cancellable: true,
+    },
+    async (progress, token) => {
+      let res = null;
+      // Fetch question title
+      res = await ltGraph.fetchTitle(parsed.slug);
+      const title = res.data.question.title;
+      const id = res.data.question.frontendQuestionId.padStart(4, "0");
+      const formattedTitle = `[${id}] ${title}`;
+      // Fetch question content
+      res = await ltGraph.fetchContent(parsed.slug);
+      const [cssUri, localResourceRoots] = getCssUri();
+      // Create webview panel
+      const panel = vscode.window.createWebviewPanel(
+        "leetcode",
+        formattedTitle,
+        { preserveFocus: true, viewColumn: vscode.ViewColumn.Beside },
+        {
+          enableScripts: true,
+          enableForms: false,
+          localResourceRoots: localResourceRoots,
+        }
+      );
+      // Update webview panel
+      const cssSrc = panel.webview.asWebviewUri(cssUri).toString();
+      panel.webview.html = generateHTML(
+        formattedTitle,
+        res.data.question.content,
+        cssSrc
+      );
+    }
+  );
 }

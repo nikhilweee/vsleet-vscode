@@ -123,7 +123,7 @@ export function parseEditor(parseTests = true) {
   if (!id) {
     vscode.window.showErrorMessage(
       `Cannot parse problem ID.
-      Please run vsleet: Load Problem
+      Please run vsleet: New Problem
       to load a fresh solution template.`
     );
     throw new Error("Cannot parse problem ID.");

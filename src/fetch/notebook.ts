@@ -100,7 +100,7 @@ export async function getCode(slug: string, ltGraph: LTGraphAPI) {
   };
 
   // Fetch question content
-  res = await ltGraph.fetchProblem(slug);
+  res = await ltGraph.fetchContent(slug);
   question.content = res.data.question.content;
 
   // Fetch editor contents

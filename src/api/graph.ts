@@ -56,7 +56,29 @@ export class LTGraphAPI {
     return this.graphAPICall(query, variables);
   }
 
-  async fetchProblem(slug: string) {
+  async fetchTitle(slug: string) {
+    const query = `
+      query questionTitle($titleSlug: String!) {
+        question(titleSlug: $titleSlug) {
+          backendQuestionId: questionId
+          frontendQuestionId: questionFrontendId
+          title
+          titleSlug
+          isPaidOnly
+          difficulty
+          likes
+          dislikes
+          categoryTitle
+        }
+      }`;
+
+    const variables = {
+      titleSlug: slug,
+    };
+    return this.graphAPICall(query, variables);
+  }
+
+  async fetchContent(slug: string) {
     const query = `
       query questionContent($titleSlug: String!) {
         question(titleSlug: $titleSlug) {

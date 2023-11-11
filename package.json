@@ -29,23 +29,23 @@
     "commands": [
       {
         "command": "vsleet.load",
-        "title": "vsleet: Load Problem"
+        "title": "vsleet: New Problem"
       },
       {
         "command": "vsleet.notebook",
-        "title": "vsleet: Load Notebook"
+        "title": "vsleet: New Notebook"
       },
       {
         "command": "vsleet.login",
         "title": "vsleet: Paste Cookie"
       },
       {
-        "command": "vsleet.update",
-        "title": "vsleet: Update Template"
-      },
-      {
         "command": "vsleet.session",
         "title": "vsleet: Select Session"
+      },
+      {
+        "command": "vsleet.update",
+        "title": "vsleet: Update Template"
       },
       {
         "command": "vsleet.local",
@@ -70,6 +70,10 @@
           "light": "media/vsleet-light.png",
           "dark": "media/vsleet-dark.png"
         }
+      },
+      {
+        "command": "vsleet.description",
+        "title": "vsleet: Open Description"
       }
     ],
     "menus": {

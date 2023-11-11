@@ -29,6 +29,8 @@ export interface QuestionDisplay {
 export interface QuestionMeta {
   params: Object[];
   name: string;
+  classname?: string;
+  methods?: { params: Object[]; name: string }[];
 }
 
 export interface ParsedEditor {
@@ -40,3 +42,5 @@ export interface ParsedEditor {
   testJSON: Object[];
   results: string;
 }
+
+export type TestCase = [string, string[]];

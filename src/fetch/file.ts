@@ -3,7 +3,13 @@ import * as vscode from "vscode";
 import { LTGraphAPI } from "../api/graph";
 import { ProblemItem } from "./base";
 import { getCssUri } from "../utils";
-import { Object, Snippet, QuestionMeta, QuestionDisplay } from "../interfaces";
+import {
+  Object,
+  Snippet,
+  QuestionMeta,
+  QuestionDisplay,
+  TestCase,
+} from "../interfaces";
 
 let ltGraph: LTGraphAPI;
 
@@ -219,18 +225,11 @@ function generateCode(
 ) {
   const extension = vscode.extensions.getExtension("nikhilweee.vsleet");
   const version = extension?.packageJSON.version;
-
-  // Format tests
-  let testCases: Object[] = [];
-  tests.forEach((test) => {
-    let testCase: Object = {};
-    test.split("\n").forEach((input, i) => {
-      let arg = meta.params[i].name;
-      testCase[arg] = JSON.parse(input);
-    });
-    testCases.push(testCase);
-  });
+  const className = meta.classname || "Solution";
+  const instance = className.toLowerCase();
+  const testCases = generateRunner(tests, meta);
   const testString = JSON.stringify(testCases, null, 4);
+  snippet = snippet.replace(/(\ *def.*:\n\ *)\n/g, "$1pass");
 
   // Header
   let code = "";
@@ -248,7 +247,7 @@ function generateCode(
 
   # vsleet:code:start
 
-  ${snippet}pass
+  ${snippet}
 
   # vsleet:code:end
 
@@ -266,10 +265,11 @@ function generateCode(
   let footer = `
   
   if __name__ == "__main__":
-    solution = Solution()
-    for testcase in testcases:
-      print("testcase:", testcase)
-      result = solution.${meta.name}(**testcase)
+    ${instance} = ${className}()
+    for method, args in testcases:
+      print("testcase:", method, args)
+      function = getattr(${instance}, method)
+      result = function(*args)
       print("result:", result)
 
   # vsleet:results:start
@@ -280,4 +280,38 @@ function generateCode(
   code += footer.replace(/\n  /g, "\n");
 
   return code;
+}
+
+function generateRunner(tests: string[], meta: QuestionMeta) {
+  // Format tests
+  let testCases: TestCase[] = [];
+
+  if ("classname" in meta && tests.length === 1) {
+    // classname !== "Solution"
+    const splits = tests[0].split("\n");
+    const methods: string[] = JSON.parse(splits[0]);
+    const args: string[][] = JSON.parse(splits[1]);
+
+    args.forEach((argsArray: string[], i: number) => {
+      const method = meta.methods?.find((m) => m.name === methods[i]);
+      if (!method) {
+        return;
+      }
+      let testCase: TestCase = [method.name, []];
+      argsArray.forEach((arg) => {
+        testCase[1].push(arg);
+      });
+      testCases.push(testCase);
+    });
+  } else {
+    // classname === "Solution"
+    tests.forEach((test) => {
+      let testCase: TestCase = [meta.name, []];
+      test.split("\n").forEach((input) => {
+        testCase[1].push(JSON.parse(input));
+      });
+      testCases.push(testCase);
+    });
+  }
+  return testCases;
 }

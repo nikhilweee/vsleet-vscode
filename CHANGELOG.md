@@ -33,3 +33,4 @@ to structure this file.
 - Fix bug which prevented saving newly opened problem.
 - Add support for multiple methods in solution class.
 - Add command to open description for an existing template.
+- Add an error message for invalid cookie.

@@ -7,7 +7,6 @@ export async function handleLogin(context: vscode.ExtensionContext) {
     title: "Login to LeetCode",
   });
   if (cookie) {
-    context.secrets.store("cookie", cookie);
     let token = cookie.split(";").find((element) => {
       return element.split("=").shift() === "csrftoken";
     });
@@ -15,6 +14,7 @@ export async function handleLogin(context: vscode.ExtensionContext) {
     if (!csrftoken) {
       vscode.window.showErrorMessage(`Cannot find csrftoken in cookie.`);
     } else {
+      context.secrets.store("cookie", cookie);
       vscode.window.showInformationMessage(`Cookie set successfully.`);
     }
   }

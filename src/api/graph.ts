@@ -9,11 +9,10 @@ export class LTGraphAPI {
   public static async getInstance(context: vscode.ExtensionContext) {
     if (!LTGraphAPI.instance) {
       LTGraphAPI.instance = new LTGraphAPI();
-      // Set cookie for a new instance
-      const cookie = await context.secrets.get("cookie");
-      if (cookie) {
-        LTGraphAPI.instance.cookie = cookie;
-      }
+    }
+    const cookie = await context.secrets.get("cookie");
+    if (cookie) {
+      LTGraphAPI.instance.cookie = cookie;
     }
     return LTGraphAPI.instance;
   }

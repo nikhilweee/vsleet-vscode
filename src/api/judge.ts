@@ -4,17 +4,15 @@ import { Object } from "../interfaces";
 
 export class LTJudgeAPI {
   private cookie = "";
-
   private static instance: LTJudgeAPI;
 
   public static async getInstance(context: vscode.ExtensionContext) {
     if (!LTJudgeAPI.instance) {
       LTJudgeAPI.instance = new LTJudgeAPI();
-      // Set cookie for a new instance
-      const cookie = await context.secrets.get("cookie");
-      if (cookie) {
-        LTJudgeAPI.instance.cookie = cookie;
-      }
+    }
+    const cookie = await context.secrets.get("cookie");
+    if (cookie) {
+      LTJudgeAPI.instance.cookie = cookie;
     }
     return LTJudgeAPI.instance;
   }

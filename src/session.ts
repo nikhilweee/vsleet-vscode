@@ -1,7 +1,6 @@
 import * as vscode from "vscode";
 import { LTJudgeAPI } from "./api/judge";
 import { Object } from "./interfaces";
-import { stat } from "fs";
 
 export async function updateStatusBar(
   context: vscode.ExtensionContext,
@@ -13,6 +12,18 @@ export async function updateStatusBar(
   const ltJudge = await LTJudgeAPI.getInstance(context);
   const body = JSON.stringify({});
   const res = await ltJudge.session(body);
+  if (!("sessions" in res)) {
+    return vscode.window
+      .showErrorMessage(
+        "Cannot fetch active session. Please login again.",
+        "Paste Cookie"
+      )
+      .then((selection) => {
+        if (selection) {
+          vscode.commands.executeCommand("vsleet.login");
+        }
+      });
+  }
   const active = res.sessions.find((session: Object) => {
     return session.is_active;
   });

@@ -35,3 +35,4 @@ to structure this file.
 - Add command to open description for an existing template.
 - Add an error message for invalid cookie.
 - Add a configuration to save default study plan.
+- Support python style comments in test cases.

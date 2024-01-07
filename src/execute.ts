@@ -173,7 +173,15 @@ export function parseEditor(parseTests = true) {
       throw new Error("Cannot parse test cases.");
     }
 
-    const testJSON = JSON5.parse(resultsTestCases[0]);
+    // Remove comments from test cases
+    const parsedTestCases = resultsTestCases[0].replace(
+      RegExp("\\n\\s*#.*", "g"),
+      ""
+    );
+
+    console.log(parsedTestCases);
+
+    const testJSON = JSON5.parse(parsedTestCases);
     let tests = "";
     testJSON.forEach((testcase: Object) => {
       for (let value of testcase[1]) {

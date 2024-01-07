@@ -36,18 +36,13 @@ export async function updateStatusBar(
     const currentStudyPlan = config.get("vsleet.currentStudyPlanSlug", "None");
 
     const tooltipValue = new vscode.MarkdownString(
-      `**LeetCode Session**  
-       **ID**: ${active.id}  
-       **Name**: ${active.name || "anonymous"}  
-       <br>
-       **Accepted / Total**  
-       **Questions**: ${active.ac_questions}/${active.submitted_questions}  
-       **Submissions**: ${active.total_acs}/${active.total_submitted}  
-       <br>
-       **Active Study Plan**  
-       ${currentStudyPlan}`
+      `**Session**: ${active.name || "anonymous"}  
+       **Study Plan**: ${currentStudyPlan}  
+       **Questions**: ${active.ac_questions} (AC) / 
+       ${active.submitted_questions}  
+       **Submissions**: ${active.total_acs} (AC) / 
+       ${active.total_submitted}`
     );
-    tooltipValue.supportHtml = true;
 
     status.tooltip = tooltipValue;
     status.show();

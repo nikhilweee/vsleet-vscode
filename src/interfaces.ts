@@ -43,4 +43,11 @@ export interface ParsedEditor {
   results: string;
 }
 
+export interface SolutionPayload {
+  lang: string;
+  question_id: number;
+  typed_code: string;
+  study_plan_slug?: string;
+}
+
 export type TestCase = [string, string[]];

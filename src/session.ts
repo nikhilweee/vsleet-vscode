@@ -7,7 +7,8 @@ export async function updateStatusBar(
   status: vscode.StatusBarItem
 ) {
   status.name = "vsleet Session";
-  status.command = "vsleet.session";
+  // Do not invoke any command for now
+  // status.command = "vsleet.showConfig";
   status.show();
   const ltJudge = await LTJudgeAPI.getInstance(context);
   const body = JSON.stringify({});
@@ -30,12 +31,25 @@ export async function updateStatusBar(
   if (active !== undefined) {
     status.text = `$(vsleet-logo) ${active.name || "anonymous"} `;
     status.text += `${active.ac_questions}:${active.total_submitted}`;
-    status.tooltip =
-      "vsleet Session\n" +
-      `ID: ${active.id}\n` +
-      `Name: ${active.name || "anonymous"}\n` +
-      `Questions: ${active.ac_questions}/${active.submitted_questions}\n` +
-      `Submissions: ${active.total_acs}/${active.total_submitted}\n`;
+
+    const config = vscode.workspace.getConfiguration();
+    const currentStudyPlan = config.get("vsleet.currentStudyPlanSlug", "None");
+
+    const tooltipValue = new vscode.MarkdownString(
+      `**LeetCode Session**  
+       **ID**: ${active.id}  
+       **Name**: ${active.name || "anonymous"}  
+       <br>
+       **Accepted / Total**  
+       **Questions**: ${active.ac_questions}/${active.submitted_questions}  
+       **Submissions**: ${active.total_acs}/${active.total_submitted}  
+       <br>
+       **Active Study Plan**  
+       ${currentStudyPlan}`
+    );
+    tooltipValue.supportHtml = true;
+
+    status.tooltip = tooltipValue;
     status.show();
   }
 }

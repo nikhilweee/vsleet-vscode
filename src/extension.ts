@@ -4,6 +4,7 @@ import * as cookie from "./cookie";
 import * as execute from "./execute";
 import * as update from "./update";
 import * as session from "./session";
+import * as studyplan from "./studyplan";
 import * as notebook from "./fetch/notebook";
 
 export function activate(context: vscode.ExtensionContext) {
@@ -60,6 +61,11 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand("vsleet.session", () => {
       session.handleSession(context, statusBar);
+    })
+  );
+  context.subscriptions.push(
+    vscode.commands.registerCommand("vsleet.studyPlan", () => {
+      studyplan.handleStudyPlan(context);
     })
   );
   context.subscriptions.push(

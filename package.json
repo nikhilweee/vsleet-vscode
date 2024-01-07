@@ -44,6 +44,10 @@
         "title": "vsleet: Select Session"
       },
       {
+        "command": "vsleet.studyPlan",
+        "title": "vsleet: Select Study Plan"
+      },
+      {
         "command": "vsleet.update",
         "title": "vsleet: Update Template"
       },
@@ -76,6 +80,16 @@
         "title": "vsleet: Open Description"
       }
     ],
+    "configuration": {
+      "title": "VSLeet",
+      "properties": {
+        "vsleet.currentStudyPlanSlug": {
+          "type": "string",
+          "default": null,
+          "description": "The slug of the study plan currently in use."
+        }
+      }
+    },
     "menus": {
       "editor/title/run": [
         {

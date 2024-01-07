@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import * as vscode from "vscode";
-import { Object } from "../interfaces";
+import { Object, SolutionPayload } from "../interfaces";
 
 export class LTJudgeAPI {
   private cookie = "";
@@ -24,11 +24,18 @@ export class LTJudgeAPI {
   }
 
   async submitSolution(id: number, slug: string, code: string) {
-    const body = JSON.stringify({
+    let payload: SolutionPayload = {
       lang: "python3",
       question_id: id,
       typed_code: code,
-    });
+    };
+
+    const config = vscode.workspace.getConfiguration();
+    const currentStudyPlan = config.get("vsleet.currentStudyPlanSlug", "");
+    if (currentStudyPlan) {
+      payload.study_plan_slug = currentStudyPlan;
+    }
+    const body = JSON.stringify(payload);
 
     const url = `https://leetcode.com/problems/${slug}/submit/`;
     const headers = { referer: `https://leetcode.com/problems/${slug}/` };

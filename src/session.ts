@@ -33,7 +33,8 @@ export async function updateStatusBar(
     status.text += `${active.ac_questions}:${active.total_submitted}`;
 
     const config = vscode.workspace.getConfiguration();
-    const currentStudyPlan = config.get("vsleet.currentStudyPlanSlug", "None");
+    const currentStudyPlan =
+      config.get("vsleet.currentStudyPlanSlug") || "None";
 
     const tooltipValue = new vscode.MarkdownString(
       `**Session**: ${active.name || "anonymous"}  

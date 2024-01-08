@@ -18,8 +18,7 @@ export async function handleStudyPlan(context: vscode.ExtensionContext) {
           );
         });
       } else {
-        value = undefined;
-        config.update("vsleet.currentStudyPlanSlug", value).then(() => {
+        config.update("vsleet.currentStudyPlanSlug", null).then(() => {
           vscode.window.showInformationMessage(`Active Study Plan cleared.`);
         });
       }

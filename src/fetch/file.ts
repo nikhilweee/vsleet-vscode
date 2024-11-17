@@ -135,7 +135,7 @@ export async function getCode(slug: string, ltGraph: LTGraphAPI) {
   const question: QuestionDisplay = {
     id: q.frontendQuestionId.padStart(4, "0"),
     slug: slug,
-    fragment: q.backendQuestionId.padStart(4, "0"),
+    queryString: "?problemId=" + q.backendQuestionId.padStart(4, "0"),
   };
 
   // Fetch editor contents
@@ -240,7 +240,7 @@ function generateCode(
   # https://marketplace.visualstudio.com/items?itemName=nikhilweee.vsleet
 
   # View this problem directly from your browser
-  # https://leetcode.com/problems/${question.slug}#${question.fragment}
+  # https://leetcode.com/problems/${question.slug}/${question.queryString}
 
   # Write your solution between vsleet:code:start and vsleet:code:end
   # Write test cases between vsleet:tests:start and vsleet:tests:end

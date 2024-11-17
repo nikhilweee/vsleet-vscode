@@ -21,7 +21,7 @@ export interface Question {
 export interface QuestionDisplay {
   id: string;
   slug: string;
-  fragment: string;
+  queryString: string;
   title?: string;
   content?: string;
 }
@@ -34,10 +34,9 @@ export interface QuestionMeta {
 }
 
 export interface ParsedEditor {
-  id: number;
+  problemId: number;
   slug: string;
   code: string;
-  fragment: string;
   tests: string;
   testJSON: Object[];
   results: string;

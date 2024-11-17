@@ -96,7 +96,7 @@ export async function getCode(slug: string, ltGraph: LTGraphAPI) {
     id: q.frontendQuestionId.padStart(4, "0"),
     slug: slug,
     title: q.questionTitle,
-    fragment: q.backendQuestionId.padStart(4, "0"),
+    queryString: "?problemId=" + q.backendQuestionId.padStart(4, "0"),
   };
 
   // Fetch question content
@@ -154,7 +154,7 @@ function generateCells(
   ## ${question.id} ${question.title}
 
   View this problem directly from your browser  
-  https://leetcode.com/problems/${question.slug}#${question.fragment}
+  https://leetcode.com/problems/${question.slug}/${question.queryString}
 
   This notebook was generated using the vsleet extension (version ${version})  
   https://marketplace.visualstudio.com/items?itemName=nikhilweee.vsleet
@@ -197,7 +197,7 @@ function generateCells(
   );
 
   let headerpy = `
-  # https://leetcode.com/problems/${question.slug}#${question.fragment}
+  # https://leetcode.com/problems/${question.slug}/${question.queryString}
 
   from typing import List, Dict, Optional
 

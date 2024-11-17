@@ -36,3 +36,4 @@ to structure this file.
 - Add an error message for invalid cookie.
 - Add a configuration to save default study plan.
 - Support python style comments in test cases.
+- Update status bar to show username instead of session.

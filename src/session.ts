@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { LTGraphAPI } from "./api/graph";
 import { LTJudgeAPI } from "./api/judge";
 import { Object } from "./interfaces";
 
@@ -10,13 +11,12 @@ export async function updateStatusBar(
   // Do not invoke any command for now
   // status.command = "vsleet.showConfig";
   status.show();
-  const ltJudge = await LTJudgeAPI.getInstance(context);
-  const body = JSON.stringify({});
-  const res = await ltJudge.session(body);
-  if (!("sessions" in res)) {
+  const ltGraph = await LTGraphAPI.getInstance(context);
+  const res = await ltGraph.fetchGlobalData();
+  if (!res.data.userStatus.isSignedIn) {
     return vscode.window
       .showErrorMessage(
-        "Cannot fetch active session. Please login again.",
+        "Cannot fetch user details. Please login again.",
         "Paste Cookie"
       )
       .then((selection) => {
@@ -25,29 +25,9 @@ export async function updateStatusBar(
         }
       });
   }
-  const active = res.sessions.find((session: Object) => {
-    return session.is_active;
-  });
-  if (active !== undefined) {
-    status.text = `$(vsleet-logo) ${active.name || "anonymous"} `;
-    status.text += `${active.ac_questions}:${active.total_submitted}`;
-
-    const config = vscode.workspace.getConfiguration();
-    const currentStudyPlan =
-      config.get("vsleet.currentStudyPlanSlug") || "None";
-
-    const tooltipValue = new vscode.MarkdownString(
-      `**Session**: ${active.name || "anonymous"}  
-       **Study Plan**: ${currentStudyPlan}  
-       **Questions**: ${active.ac_questions} (AC) / 
-       ${active.submitted_questions}  
-       **Submissions**: ${active.total_acs} (AC) / 
-       ${active.total_submitted}`
-    );
-
-    status.tooltip = tooltipValue;
-    status.show();
-  }
+  status.text = `$(vsleet-logo) ${res.data.userStatus.username} `;
+  status.tooltip = `Signed in as ${res.data.userStatus.username}`;
+  status.show();
 }
 
 export async function handleSession(

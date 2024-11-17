@@ -138,6 +138,30 @@ export class LTGraphAPI {
     return this.graphAPICall(query, variables);
   }
 
+  async fetchGlobalData() {
+    const query = `
+      query globalData {
+        userStatus {
+          userId
+          isSignedIn
+          isMockUser
+          isPremium
+          isVerified
+          username
+          realName
+          avatar
+          isAdmin
+          isSuperuser
+          permissions
+          isTranslator
+          activeSessionId
+        }
+      }`;
+
+    const variables = {};
+    return this.graphAPICall(query, variables);
+  }
+
   async prepareHeaders() {
     let headers: Object;
     let csrftoken = "";

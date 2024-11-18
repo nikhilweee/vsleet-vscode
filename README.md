@@ -21,6 +21,9 @@ https://marketplace.visualstudio.com/items?itemName=nikhilweee.vsleet
 
 ![vsleet Walkthrough](https://i.imgur.com/jjc4z6h.gif)
 
+In case the video doesn't load, here is the
+[direct link](https://i.imgur.com/jjc4z6h.gif).
+
 ## Commands
 
 - `vsleet: New Problem`: Load a problem from LeetCode

@@ -102,7 +102,7 @@ export function parseEditor(parseTests = true) {
 
   const reURL = RegExp("# (https:\\/\\/leetcode\\.com\\/problems\\/.*)");
   const matchURL = reURL.exec(text);
-  if (!matchURL || matchURL.length != 2) {
+  if (!matchURL || matchURL.length !== 2) {
     vscode.window.showWarningMessage(
       `Cannot parse problem URL.
       Please run vsleet: Update Template

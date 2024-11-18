@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 import * as vscode from "vscode";
 import { LTGraphAPI } from "../api/graph";
 import { ProblemItem } from "./base";

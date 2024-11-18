@@ -44,6 +44,8 @@ export interface ParsedEditor {
   results: string;
 }
 
+/* eslint-disable @typescript-eslint/naming-convention */
+
 export interface SolutionPayload {
   /** The language of the current solution */
   lang: string;
@@ -56,5 +58,7 @@ export interface SolutionPayload {
   /** The envId of the study plan */
   study_plan_slug?: string;
 }
+
+/* eslint-enable @typescript-eslint/naming-convention */
 
 export type TestCase = [string, string[]];

@@ -54,7 +54,7 @@ export interface SolutionPayload {
   /** The code representing the current solution */
   typed_code: string;
   /** The envId of the problem list */
-  favourite_slug?: string;
+  favorite_slug?: string;
   /** The envId of the study plan */
   study_plan_slug?: string;
 }

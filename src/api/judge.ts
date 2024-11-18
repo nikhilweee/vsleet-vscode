@@ -37,7 +37,7 @@ export class LTJudgeAPI {
     };
 
     if (envId && envType === "problem-list-v2") {
-      payload.favourite_slug = envId;
+      payload.favorite_slug = envId;
     }
     if (envId && envType === "study-plan-v2") {
       payload.study_plan_slug = envId;

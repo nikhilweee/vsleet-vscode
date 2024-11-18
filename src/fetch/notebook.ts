@@ -98,6 +98,12 @@ export async function getCode(slug: string, ltGraph: LTGraphAPI) {
     queryString: "?problemId=" + q.backendQuestionId.padStart(4, "0"),
   };
 
+  const config = vscode.workspace.getConfiguration();
+  const envQS = config.get("vsleet.environmentQueryString", "");
+  if (envQS) {
+    question.queryString += envQS;
+  }
+
   // Fetch question content
   res = await ltGraph.fetchContent(slug);
   question.content = res.data.question.content;

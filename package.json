@@ -74,7 +74,13 @@
     ],
     "configuration": {
       "title": "VSLeet",
-      "properties": {}
+      "properties": {
+        "vsleet.environmentQueryString": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "A query string representing the default problem list or study plan. This is used while creating new problem templates. \n\nFor problem lists, the query string looks like `&envType=problem-list-v2&envId=abcdefgh` whereas for study plans, the query string looks like `&envType=study-plan-v2&envId=abcdefgh`. \n\nLeave this blank if not using either."
+        }
+      }
     },
     "menus": {
       "editor/title/run": [

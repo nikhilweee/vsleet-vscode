@@ -40,10 +40,6 @@
         "title": "vsleet: Paste Cookie"
       },
       {
-        "command": "vsleet.session",
-        "title": "vsleet: Select Session"
-      },
-      {
         "command": "vsleet.update",
         "title": "vsleet: Update Template"
       },

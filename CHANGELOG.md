@@ -37,3 +37,6 @@ to structure this file.
 - Add a configuration to save default study plan.
 - Support python style comments in test cases.
 - Update status bar to show username instead of session.
+- Add support for question lists (environments).
+- Update URL comment to include environment ID.
+- Move study plan definition to problem URL.

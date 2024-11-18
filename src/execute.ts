@@ -17,7 +17,7 @@ export async function handleRun(context: vscode.ExtensionContext) {
   const parsed = parseEditor();
 
   let res = await ltJudge.runSolution(
-    parsed.id,
+    parsed.problemId,
     parsed.slug,
     parsed.code,
     parsed.tests
@@ -31,7 +31,13 @@ export async function handleSubmit(context: vscode.ExtensionContext) {
 
   const parsed = parseEditor(false);
 
-  let res = await ltJudge.submitSolution(parsed.id, parsed.slug, parsed.code);
+  let res = await ltJudge.submitSolution(
+    parsed.problemId,
+    parsed.envType,
+    parsed.envId,
+    parsed.slug,
+    parsed.code
+  );
   const checkId = res.submission_id;
   await checkExecution(checkId, parsed.slug, [], "Submission");
 }
@@ -88,45 +94,40 @@ export function parseEditor(parseTests = true) {
   const text = vscode.window.activeTextEditor.document.getText();
 
   let slug = "";
-  let id = 0;
-  let fragment = "";
+  let problemId = 0;
+  let envId = "";
+  let envType = "";
 
-  // Parse problem fragment
-  const reFragment = RegExp(
-    "# https:\\/\\/leetcode\\.com\\/problems\\/([\\w-]*)#([\\d]+)"
-  );
-  const matchFragment = reFragment.exec(text);
-  if (!matchFragment || matchFragment.length < 3) {
+  // Parse problem URL
+
+  const reURL = RegExp("# (https:\\/\\/leetcode\\.com\\/problems\\/.*)");
+  const matchURL = reURL.exec(text);
+  if (!matchURL || matchURL.length != 2) {
     vscode.window.showWarningMessage(
-      `Cannot parse problem fragment.
+      `Cannot parse problem URL.
       Please run vsleet: Update Template
       to update the solution template.`
     );
   } else {
-    slug = slug || matchFragment[1];
-    id = id || parseInt(matchFragment[2]);
-    fragment = matchFragment[2];
+    const url = new URL(matchURL[1]);
+    slug = url.pathname.split("/")[2];
+    problemId = parseInt(url.searchParams.get("problemId") || "0");
+    envId = url.searchParams.get("envId") || "";
+    envType = url.searchParams.get("envType") || "";
   }
 
-  if (!id) {
-    // Parse problem details
-    const reName = RegExp("# (\\d*)-([\\w-]*).py");
-    const matchName = reName.exec(text);
-    if (matchName && matchName.length >= 3) {
-      vscode.window.showWarningMessage(`Parsed problem ID may be incorrect.`);
-      slug = matchName[2];
-      id = parseInt(matchName[1]);
-      fragment = matchName[1];
-    }
-  }
-
-  if (!id) {
+  if (!problemId) {
     vscode.window.showErrorMessage(
       `Cannot parse problem ID.
       Please run vsleet: New Problem
       to load a fresh solution template.`
     );
     throw new Error("Cannot parse problem ID.");
+  }
+
+  if (envId && !envType) {
+    vscode.window.showErrorMessage(`Missing envType for envId ${envId}.`);
+    throw new Error("Missing envType.");
   }
 
   // Parse solution
@@ -143,9 +144,10 @@ export function parseEditor(parseTests = true) {
   const code = matchCode[1];
 
   const parsed: ParsedEditor = {
-    id: id,
+    problemId: problemId,
+    envId: envId,
+    envType: envType,
     slug: slug,
-    fragment: fragment,
     code: code,
     tests: "",
     testJSON: [],
@@ -219,6 +221,7 @@ function parseResults(
 
   // Format Test Cases
 
+  const n = parseInt(results.total_testcases);
   const answers = pop(results, "code_answer");
   const truths = pop(results, "expected_code_answer");
   const comparison = pop(results, "compare_result");
@@ -233,7 +236,7 @@ function parseResults(
     typeof std_output_list === "object"
   ) {
     html.tests = `<h2>Test Cases</h2>`;
-    answers.map((answer, i) => {
+    answers.slice(0, n).map((answer, i) => {
       const expected = truths[i];
       const compare = comparison[i] === "1" ? "🟢" : "🔴";
       const stdout = std_output_list[i];

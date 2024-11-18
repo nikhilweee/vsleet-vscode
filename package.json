@@ -10,7 +10,7 @@
   "description": "Submit LeetCode problems directly from VSCode",
   "version": "0.1.13",
   "engines": {
-    "vscode": "^1.83.0"
+    "vscode": "^1.95.0"
   },
   "categories": [
     "Other"

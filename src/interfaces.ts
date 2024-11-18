@@ -35,6 +35,8 @@ export interface QuestionMeta {
 
 export interface ParsedEditor {
   problemId: number;
+  envType: string;
+  envId: string;
   slug: string;
   code: string;
   tests: string;
@@ -43,9 +45,15 @@ export interface ParsedEditor {
 }
 
 export interface SolutionPayload {
+  /** The language of the current solution */
   lang: string;
+  /** The problemId of the current solution */
   question_id: number;
+  /** The code representing the current solution */
   typed_code: string;
+  /** The envId of the problem list */
+  favourite_slug?: string;
+  /** The envId of the study plan */
   study_plan_slug?: string;
 }
 

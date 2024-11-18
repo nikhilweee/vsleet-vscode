@@ -23,20 +23,26 @@ export class LTJudgeAPI {
     return this.judgeAPICall(url, headers, null);
   }
 
-  async submitSolution(id: number, slug: string, code: string) {
+  async submitSolution(
+    problemId: number,
+    envType: string,
+    envId: string,
+    slug: string,
+    code: string
+  ) {
     let payload: SolutionPayload = {
       lang: "python3",
-      question_id: id,
+      question_id: problemId,
       typed_code: code,
     };
 
-    const config = vscode.workspace.getConfiguration();
-    const currentStudyPlan = config.get("vsleet.currentStudyPlanSlug", "");
-    if (currentStudyPlan) {
-      payload.study_plan_slug = currentStudyPlan;
+    if (envId && envType === "problem-list-v2") {
+      payload.favourite_slug = envId;
+    }
+    if (envId && envType === "study-plan-v2") {
+      payload.study_plan_slug = envId;
     }
     const body = JSON.stringify(payload);
-
     const url = `https://leetcode.com/problems/${slug}/submit/`;
     const headers = { referer: `https://leetcode.com/problems/${slug}/` };
     return this.judgeAPICall(url, headers, body);

@@ -19,14 +19,13 @@ https://marketplace.visualstudio.com/items?itemName=nikhilweee.vsleet
 
 ## Walkthrough
 
-![vsleet Walkthrough](https://i.imgur.com/r4ErS0z.gif)
+![vsleet Walkthrough](https://i.imgur.com/jjc4z6h.gif)
 
 ## Commands
 
 - `vsleet: New Problem`: Load a problem from LeetCode
 - `vsleet: New Notebook`: Load problem as Jupyter notebook
 - `vsleet: Paste Cookie`: Paste cookie to authenticate
-- `vsleet: Select Session`: Change the active session
 - `vsleet: Update Template`: Update solution template
 - `vsleet: Local Solution`: Run Code Locally
 - `vsleet: Run Solution`: Run solution on LeetCode
@@ -57,10 +56,11 @@ leetcode.com to run `vsleet: Run Solution` and `vsleet: Submit Solution`.
 3. Run the `vsleet: Paste Cookie` command.
 4. Paste the cookies copied from the browser.
 
-If you are using Google Chrome, you can use our extension to copy cookies:
+If you are using chromium based browsers such as Google Chrome or Microsoft
+Edge, you can use our extension to copy cookies:
 https://chromewebstore.google.com/detail/vsleet/ihgifhobfmjhcelknpbjhpabkcghjmfh?hl=en
 
-If you are an advanced user, feel free to copy cookies using browser dev tools.
+If you are an advanced user, feel free to copy cookies using browser devtools.
 
 The `vsleet: Paste Cookie` command expectes a cookie string in the format:
 

@@ -242,7 +242,7 @@ function parseResults(
       const stdout = std_output_list[i];
 
       let inputs_formatted = "";
-      Object.values(testJSON[i]).forEach((input, index) => {
+      Object.values(testJSON[i][1]).forEach((input, index) => {
         inputs_formatted += `<strong>Input ${index + 1}</strong>  : ${input}\n`;
       });
       inputs_formatted = inputs_formatted.trim();

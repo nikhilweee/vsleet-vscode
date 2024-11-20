@@ -42,6 +42,9 @@ In case the video doesn't load, here is the
 - <kbd>ctrl/cmd</kbd>+<kbd>shift</kbd>+<kbd>enter</kbd>:
   `vsleet: Submit Solution`
 
+Tip: If the <kbd>shift</kbd>+<kbd>enter</kbd> shortcut opens a Python REPL
+instead, go to settings and set `python.REPL.sendToNativeREPL` to False.
+
 ## Requirements
 
 The `vsleet: Local Solution` command internally triggers

@@ -40,3 +40,4 @@ to structure this file.
 - Add support for question lists (environments).
 - Update URL comment to include environment ID.
 - Move study plan definition to problem URL.
+- Remove option to load notebook.

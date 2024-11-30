@@ -4,7 +4,6 @@ import * as cookie from "./cookie";
 import * as execute from "./execute";
 import * as update from "./update";
 import * as session from "./session";
-import * as notebook from "./fetch/notebook";
 
 export function activate(context: vscode.ExtensionContext) {
   // Status Bar
@@ -21,11 +20,6 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand("vsleet.load", () => {
       fetch.handleLoad(context);
-    })
-  );
-  context.subscriptions.push(
-    vscode.commands.registerCommand("vsleet.notebook", () => {
-      notebook.handleLoad(context);
     })
   );
   context.subscriptions.push(

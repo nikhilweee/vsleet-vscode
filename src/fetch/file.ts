@@ -85,7 +85,7 @@ async function handleAccept(activeItem: ProblemItem, ltGraph: LTGraphAPI) {
         vscode.TextEdit.insert(new vscode.Position(0, 0), code.contents),
       ]);
       await vscode.workspace.applyEdit(edit);
-      // Show notebook
+      // Show file
       vscode.window
         .showTextDocument(document, {
           viewColumn: vscode.ViewColumn.Active,

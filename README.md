@@ -27,6 +27,7 @@ In case the video doesn't load, here is the
 ## Commands
 
 - `vsleet: New Problem`: Load a problem from LeetCode
+- `vsleet: New Notebook`: Load problem as Jupyter notebook
 - `vsleet: Paste Cookie`: Paste cookie to authenticate
 - `vsleet: Update Template`: Update solution template
 - `vsleet: Local Solution`: Run Code Locally

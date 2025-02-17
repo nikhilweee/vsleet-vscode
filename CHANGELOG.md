@@ -26,7 +26,7 @@ to structure this file.
 - Add status bar item with active session information.
 - Add command to change active session.
 
-## [Unreleased]
+## 0.2
 
 - Handle null, true, and false values in default testcases.
 - Add option to load notebook instead of python file.
@@ -40,4 +40,7 @@ to structure this file.
 - Add support for question lists (environments).
 - Update URL comment to include environment ID.
 - Move study plan definition to problem URL.
-- Remove option to load notebook.
+
+## [Unreleased]
+
+- Fix errors when submitting solutions from a notebook.

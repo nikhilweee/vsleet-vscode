@@ -8,7 +8,13 @@ import { getCssUri } from "./utils";
 let ltJudge: LTJudgeAPI;
 
 export async function handleLocal() {
-  vscode.commands.executeCommand("python.execInTerminal");
+  if (vscode.window.activeNotebookEditor === undefined) {
+    vscode.commands.executeCommand("python.execInTerminal");
+  } else {
+    vscode.window.showInformationMessage(
+      `Please execute notebook cell directly.`
+    );
+  }
 }
 
 export async function handleRun(context: vscode.ExtensionContext) {
@@ -78,6 +84,7 @@ async function checkExecution(
       vscode.window.showErrorMessage(
         `vsleet ${command}: Timed out waiting for Judge.`
       );
+      throw new Error("Timed out waiting for Judge.");
     }
   );
 }

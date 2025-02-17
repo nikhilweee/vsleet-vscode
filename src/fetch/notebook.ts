@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
 import { LTGraphAPI } from "../api/graph";
 import { ProblemItem } from "./base";
-import { getCssUri } from "../utils";
 import {
+  Object,
   Snippet,
   QuestionMeta,
   QuestionDisplay,
@@ -57,67 +57,34 @@ async function handleAccept(activeItem: ProblemItem, ltGraph: LTGraphAPI) {
     },
     async (progress, token) => {
       // Fetch problem description
-      progress.report({ message: "Creating Template" });
+      progress.report({ message: "Creating Notebook" });
       const code = await getCode(activeItem.slug, ltGraph);
-      const path = `${code.question.id}-${code.question.slug}.py`;
-      let pathUri = vscode.Uri.file(path);
-      if (vscode.workspace.workspaceFolders) {
-        const folder = vscode.workspace.workspaceFolders[0];
-        pathUri = vscode.Uri.joinPath(folder.uri, path);
-      }
-      // Create empty file with suggested filename
-      try {
-        await vscode.workspace.fs.stat(pathUri);
-        // path exists, add unix epoch to filename
-        const stem = pathUri.path.split(".").shift();
-        const epoch = Math.floor(Date.now() / 1000);
-        const path = `${stem}-${epoch}.py`;
-        pathUri = pathUri.with({ scheme: "untitled", path: path });
-      } catch {
-        // path does not exist, continue as is
-        pathUri = pathUri.with({ scheme: "untitled" });
-      }
-      const document = await vscode.workspace.openTextDocument(pathUri);
-      // Edit file and insert template data
+      const path = `${code.question.id}-${code.question.slug}.ipynb`;
+      const pathUri = vscode.Uri.file(path);
+      // Create empty notebook with suggested filename
+      const document = await vscode.workspace.openNotebookDocument(
+        pathUri.with({ scheme: "untitled" })
+      );
+      // Edit notebook and insert template data
       const edit = new vscode.WorkspaceEdit();
       edit.set(document.uri, [
-        vscode.TextEdit.insert(new vscode.Position(0, 0), code.contents),
+        vscode.NotebookEdit.replaceCells(
+          new vscode.NotebookRange(0, 1),
+          code.cells
+        ),
       ]);
       await vscode.workspace.applyEdit(edit);
-      // Show file
+      // Show notebook
       vscode.window
-        .showTextDocument(document, {
+        .showNotebookDocument(document, {
           viewColumn: vscode.ViewColumn.Active,
         })
         .then((editor) => {
           setTimeout(() => {
             // Apply formatting after a while
-            vscode.commands.executeCommand("editor.action.formatDocument");
-          }, 2000);
+            vscode.commands.executeCommand("notebook.format");
+          }, 5000);
         });
-
-      // Fetch problem description
-      progress.report({ message: "Loading Problem" });
-      const res = await ltGraph.fetchContent(activeItem.slug);
-      const [cssUri, localResourceRoots] = getCssUri();
-      // Create webview panel
-      const panel = vscode.window.createWebviewPanel(
-        "leetcode",
-        activeItem.title,
-        { preserveFocus: true, viewColumn: vscode.ViewColumn.Beside },
-        {
-          enableScripts: true,
-          enableForms: false,
-          localResourceRoots: localResourceRoots,
-        }
-      );
-      // Update webview panel
-      const cssSrc = panel.webview.asWebviewUri(cssUri).toString();
-      panel.webview.html = generateHTML(
-        activeItem.title,
-        res.data.question.content,
-        cssSrc
-      );
     }
   );
 }
@@ -133,6 +100,7 @@ export async function getCode(slug: string, ltGraph: LTGraphAPI) {
   const question: QuestionDisplay = {
     id: q.frontendQuestionId.padStart(4, "0"),
     slug: slug,
+    title: q.questionTitle,
     queryString: "?problemId=" + q.backendQuestionId.padStart(4, "0"),
   };
 
@@ -141,6 +109,10 @@ export async function getCode(slug: string, ltGraph: LTGraphAPI) {
   if (envQS) {
     question.queryString += envQS;
   }
+
+  // Fetch question content
+  res = await ltGraph.fetchContent(slug);
+  question.content = res.data.question.content;
 
   // Fetch editor contents
   res = await ltGraph.fetchEditor(slug);
@@ -160,70 +132,11 @@ export async function getCode(slug: string, ltGraph: LTGraphAPI) {
     snippet = { langSlug: "python3", code: "" };
   }
 
-  const fileContents = generateCode(question, snippet.code, tests, meta);
-  return { contents: fileContents, question: question };
+  const fileContents = generateCells(question, snippet.code, tests, meta);
+  return { cells: fileContents.cells, question: question };
 }
 
-export function generateHTML(title: string, content: string, cssSrc: string) {
-  const html = `
-  <html>
-  <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" type="text/css" href="${cssSrc}">
-  <style>
-    pre { white-space: pre-wrap; }
-    header {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-    }
-    header > * { display: inline-block; }
-  </style>
-  </head>
-  <body>
-  <header>
-    <h3>${title}</h3>
-    <span id="stopwatch">00:00:00</span>
-  </header>
-  <main>${content}</main>
-  <script>
-  let start = Date.now();
-  let intervalID = null;
-  const display = document.getElementById("stopwatch");
-  function setEmoji(emoji) {
-    display.innerHTML = display.innerHTML.replace(/\\p{S}/gu, emoji);
-  }
-  function startStopwatch() {
-    intervalID = setInterval(() => {
-      const ms = Date.now() - start;
-      display.dataset.ms = ms;
-      const elapsed = new Date(ms).toISOString().slice(11, 19);
-      display.innerHTML = "⏸ " + elapsed;
-    }, 500);
-  }
-  function clickStopwatch() {
-    if (intervalID) {
-      clearInterval(intervalID);
-      setEmoji("▶");
-      intervalID = null;
-    } else {
-      const ms = display.dataset.ms;
-      start = Date.now() - ms;
-      setEmoji("⏸");
-      startStopwatch();
-    }
-  }
-  document.addEventListener("DOMContentLoaded", () => {
-    startStopwatch();
-    display.addEventListener("click", clickStopwatch);
-  });
-  </script>
-  </body>
-  </html>`;
-  return html;
-}
-
-function generateCode(
+function generateCells(
   question: QuestionDisplay,
   snippet: string,
   tests: string[],
@@ -235,41 +148,81 @@ function generateCode(
   const instance = className.toLowerCase();
   const testCases = generateRunner(tests, meta);
   const testString = JSON.stringify(testCases, null, 4);
-  snippet = snippet.replace(/(\ *def.*:\n\ +)/g, "$1pass");
+  const cells: vscode.NotebookCellData[] = [];
 
-  // Header
-  let code = "";
-  let header = `
-  # This file was generated using the vsleet extension (version ${version})
-  # https://marketplace.visualstudio.com/items?itemName=nikhilweee.vsleet
+  // Add header cell
 
-  # View this problem directly from your browser
+  let headermd = `
+  ## Instructions
+  
+  View this problem directly from your browser  
+  https://leetcode.com/problems/${question.slug}/${question.queryString}
+
+  This notebook was generated using the vsleet extension (version ${version})  
+  https://marketplace.visualstudio.com/items?itemName=nikhilweee.vsleet
+
+  Write your solution between \`vsleet:code:start\` and \`vsleet:code:end\`  
+  Write test cases between \`vsleet:tests:start\` and \`vsleet:tests:end\`  
+  `;
+
+  cells.push(
+    new vscode.NotebookCellData(
+      vscode.NotebookCellKind.Markup,
+      headermd,
+      "markdown"
+    )
+  );
+
+  // Add question content
+
+  let contentsmd = `## Question
+
+  **${question.id}: ${question.title}**
+
+  ${question.content}
+  `;
+
+  cells.push(
+    new vscode.NotebookCellData(
+      vscode.NotebookCellKind.Markup,
+      contentsmd,
+      "markdown"
+    )
+  );
+
+  // Add solution cell
+
+  cells.push(
+    new vscode.NotebookCellData(
+      vscode.NotebookCellKind.Markup,
+      "## Solution",
+      "markdown"
+    )
+  );
+
+  let headerpy = `
   # https://leetcode.com/problems/${question.slug}/${question.queryString}
-
-  # Write your solution between vsleet:code:start and vsleet:code:end
-  # Write test cases between vsleet:tests:start and vsleet:tests:end
 
   from typing import List, Dict, Optional
 
   # vsleet:code:start
 
-  ${snippet}
+  ${snippet}pass
 
   # vsleet:code:end
 
-  null, true, false = None, True, False
+  `.replace(/\n  /g, "\n");
 
-  `;
-  code += header.replace(/\n  /g, "\n");
+  // Add tests cell
 
-  // Tests
-  code += "# vsleet:tests:start\n\n";
-  code += `testcases = ${testString}\n\n`;
-  code += "# vsleet:tests:end";
+  let testcasespy = "null, true, false = None, True, False\n\n";
+  testcasespy += "# vsleet:tests:start\n\n";
+  testcasespy += `testcases = ${testString}\n\n`;
+  testcasespy += "# vsleet:tests:end\n\n";
 
-  // Footer
-  let footer = `
-  
+  // Add runner cell
+
+  let runnerpy = `
   if __name__ == "__main__":
     ${instance} = ${className}()
     for method, args in testcases:
@@ -277,15 +230,41 @@ function generateCode(
       function = getattr(${instance}, method)
       result = function(*args)
       print("result:", result)
+  `.replace(/\n  /g, "\n");
 
+  // Add results cell
+
+  let resultspy = `
   # vsleet:results:start
   # Run your solution for memory and runtime status, or
   # Submit your solution for memory and runtime percentiles
   # vsleet:results:end
-  `;
-  code += footer.replace(/\n  /g, "\n");
+  `.replace(/\n  /g, "\n");
 
-  return code;
+  cells.push(
+    new vscode.NotebookCellData(
+      vscode.NotebookCellKind.Code,
+      headerpy + testcasespy + runnerpy + resultspy,
+      "python"
+    )
+  );
+
+  let notesmd = `
+  ## Notes
+  Add your notes here.
+  `;
+
+  cells.push(
+    new vscode.NotebookCellData(
+      vscode.NotebookCellKind.Markup,
+      notesmd,
+      "markdown"
+    )
+  );
+
+  const data = new vscode.NotebookData(cells);
+
+  return data;
 }
 
 function generateRunner(tests: string[], meta: QuestionMeta) {

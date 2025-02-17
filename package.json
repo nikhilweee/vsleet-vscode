@@ -32,6 +32,10 @@
         "title": "vsleet: New Problem"
       },
       {
+        "command": "vsleet.notebook",
+        "title": "vsleet: New Notebook"
+      },
+      {
         "command": "vsleet.login",
         "title": "vsleet: Paste Cookie"
       },

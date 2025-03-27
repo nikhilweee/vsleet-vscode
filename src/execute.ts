@@ -73,9 +73,9 @@ async function checkExecution(
             { localResourceRoots: localResourceRoots }
           );
           const cssSrc = panel.webview.asWebviewUri(cssUri).toString();
-          const results = parseResults(res, command, testJSON, cssSrc);
-          panel.webview.html = results.formatted;
-          updateResults(results.parsed)
+          const results = formatResults(res, command, testJSON, cssSrc);
+          panel.webview.html = results.html;
+          updateResults(results.json)
             .then()
             .catch((error) => {});
           return;
@@ -217,14 +217,14 @@ export function parseEditor(parseTests = true) {
   return parsed;
 }
 
-function parseResults(
+function formatResults(
   results: Object,
   command: string,
   testJSON: Object[],
   cssSrc: string
 ) {
-  const html: Object = {};
-  const parsed: Object = {};
+  const doc: Object = {};
+  const json: Object = {};
 
   // Format Test Cases
 
@@ -234,7 +234,7 @@ function parseResults(
   const comparison = pop(results, "compare_result");
   const std_output_list = pop(results, "std_output_list");
 
-  html.tests = "";
+  doc.tests = "";
 
   if (
     typeof answers === "object" &&
@@ -242,7 +242,7 @@ function parseResults(
     typeof comparison === "string" &&
     typeof std_output_list === "object"
   ) {
-    html.tests = `<h2>Test Cases</h2>`;
+    doc.tests = `<h2>Test Cases</h2>`;
     answers.slice(0, n).map((answer, i) => {
       const expected = truths[i];
       const compare = comparison[i] === "1" ? "🟢" : "🔴";
@@ -254,7 +254,7 @@ function parseResults(
       });
       inputs_formatted = inputs_formatted.trim();
 
-      html.tests += `
+      doc.tests += `
       <pre>
       ${inputs_formatted}
       <strong>Expected</strong> : ${expected}
@@ -271,10 +271,10 @@ function parseResults(
   const num_total = pop(results, "total_testcases");
   const num_correct = pop(results, "total_correct");
   const status_msg = pop(results, "status_msg");
-  html.heading = `<h1>${command} Results</h1>`;
-  html.heading += `<strong>Status</strong>: ${status_msg}<br/>`;
-  parsed.type = command;
-  parsed.status = status_msg.toString();
+  doc.heading = `<h1>${command} Results</h1>`;
+  doc.heading += `<strong>Status</strong>: ${status_msg}<br/>`;
+  json.type = command;
+  json.status = status_msg.toString();
 
   if (num_total) {
     let emoji = "🔴";
@@ -283,26 +283,26 @@ function parseResults(
     } else if (typeof num_correct === "number" && num_correct > 0) {
       emoji = "🟡";
     }
-    html.heading += `<strong>Passed</strong>: `;
-    html.heading += `${num_correct} / ${num_total} ${emoji}<br/>`;
-    parsed.num_total = num_total.toString();
-    parsed.num_correct = num_correct.toString();
+    doc.heading += `<strong>Passed</strong>: `;
+    doc.heading += `${num_correct} / ${num_total} ${emoji}<br/>`;
+    json.num_total = num_total.toString();
+    json.num_correct = num_correct.toString();
   }
 
   // Format Statuses
 
   let runtime_status = pop(results, "status_runtime");
-  parsed.runtime_status = runtime_status.toString();
+  json.runtime_status = runtime_status.toString();
   runtime_status = `<li>Runtime Status: ${runtime_status}</li>`;
 
   let memory_status = pop(results, "status_memory");
-  parsed.memory_status = memory_status.toString();
+  json.memory_status = memory_status.toString();
   memory_status = `<li>Memory Status: ${memory_status}</li>`;
 
   let runtime_percentile = pop(results, "runtime_percentile");
   if (typeof runtime_percentile === "number") {
     runtime_percentile = runtime_percentile.toFixed(5);
-    parsed.runtime_percentile = runtime_percentile.toString();
+    json.runtime_percentile = runtime_percentile.toString();
     runtime_percentile = `<li>Runtime Percentile: ${runtime_percentile}</li>`;
   } else {
     runtime_percentile = "";
@@ -311,15 +311,15 @@ function parseResults(
   let memory_percentile = pop(results, "memory_percentile");
   if (typeof memory_percentile === "number") {
     memory_percentile = memory_percentile.toFixed(5);
-    parsed.memory_percentile = memory_percentile.toString();
+    json.memory_percentile = memory_percentile.toString();
     memory_percentile = `<li>Memory Percentile: ${memory_percentile}</li>`;
   } else {
     memory_percentile = "";
   }
 
-  parsed.timestamp = new Date().toJSON();
+  json.timestamp = new Date().toJSON();
 
-  html.status = `
+  doc.status = `
   <h2>Performance</h2>
   <ul>
   ${runtime_status}
@@ -331,11 +331,11 @@ function parseResults(
 
   // Format Errors
 
-  html.errors = "";
+  doc.errors = "";
 
   const invalid_testcase = pop(results, "invalid_testcase");
   if (invalid_testcase) {
-    html.errors += `
+    doc.errors += `
     <h2>Error</h2>
     <pre>Invalid Testcase</pre>
     `;
@@ -343,7 +343,7 @@ function parseResults(
 
   const runtime_error = pop(results, "runtime_error");
   if (runtime_error) {
-    html.errors += `
+    doc.errors += `
     <h2>Error</h2>
     <pre>${runtime_error}</pre>
     `;
@@ -351,7 +351,7 @@ function parseResults(
 
   const full_runtime_error = pop(results, "full_runtime_error");
   if (runtime_error) {
-    html.errors += `
+    doc.errors += `
     <h2>Full Error</h2>
     <pre>${full_runtime_error}</pre>
     `;
@@ -370,8 +370,8 @@ function parseResults(
     });
     inputs_formatted = inputs_formatted.trim();
 
-    html.errors += `<h2>Failure Details</h2>`;
-    html.errors += `
+    doc.errors += `<h2>Failure Details</h2>`;
+    doc.errors += `
     <pre>
     ${inputs_formatted}
     <strong>Expected</strong>: ${expected_output}
@@ -383,7 +383,7 @@ function parseResults(
 
   // Format Details
 
-  html.details = `
+  doc.details = `
   <h2>Additional Information</h2>
   <details>
   <summary>Click here to view additional information</summary><br />
@@ -395,23 +395,23 @@ function parseResults(
 
   // Format HTML
 
-  let formatted = `
+  let html = `
   <html>
   <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" type="text/css" href="${cssSrc}">
   </head>
   <body>
-  ${html.heading}
-  ${html.status}
-  ${html.tests}
-  ${html.errors}
-  ${html.details}
+  ${doc.heading}
+  ${doc.status}
+  ${doc.tests}
+  ${doc.errors}
+  ${doc.details}
   </body>
   </html>
   `;
 
-  return { parsed: parsed, formatted: formatted };
+  return { json: json, html: html };
 }
 
 function pop(object: Object, key: string): string | number | [] {

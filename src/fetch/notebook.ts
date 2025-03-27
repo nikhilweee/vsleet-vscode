@@ -251,8 +251,12 @@ function generateCells(
 
   let notesmd = `
   ## Notes
+
+  - **Time Complexity**: $O( )$
+  - **Space Complexity**: $O( )$
+
   Add your notes here.
-  `;
+  `.replace(/\n  /g, "\n");
 
   cells.push(
     new vscode.NotebookCellData(
